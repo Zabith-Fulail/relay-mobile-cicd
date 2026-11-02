@@ -32,7 +32,7 @@ jobs:
     name: "1. Quality Gate (Analyze & Test)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
@@ -50,10 +50,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout Repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: "Setup Java 17 (with Gradle Cache)"
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
@@ -122,13 +122,19 @@ jobs:
             --dart-define=BUILD_NUMBER=${{ github.run_number }} \
             --dart-define=GIT_COMMIT=${{ steps.meta.outputs.short_sha }}
 
+      - name: "Prepare Release Artifacts"
+        run: |
+          mkdir -p dist
+          cp build/app/outputs/flutter-apk/app-release.apk dist/relay-mobile-${{ steps.meta.outputs.app_env }}-v${{ steps.meta.outputs.app_version }}.apk
+          cp build/app/outputs/bundle/release/app-release.aab dist/relay-mobile-${{ steps.meta.outputs.app_env }}-v${{ steps.meta.outputs.app_version }}.aab
+          ls -lh dist/
+
       - name: "Upload Android Release Artifacts (APK + AAB)"
         uses: actions/upload-artifact@v4
         with:
           name: android-release-${{ steps.meta.outputs.app_env }}
-          path: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/bundle/release/app-release.aab
+          path: dist/*
+          if-no-files-found: error
 
   # ============================================================================
   # STAGE 3: Build iOS Release Archive (macOS Runner)
@@ -138,7 +144,7 @@ jobs:
     needs: verify
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: subosito/flutter-action@v2
         with:
           channel: "stable"
@@ -166,7 +172,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: "Download Built Android Artifacts"
         uses: actions/download-artifact@v4
@@ -178,9 +184,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
+          fail_on_unmatched_files: true
           files: |
-            release-artifacts/build/app/outputs/flutter-apk/app-release.apk
-            release-artifacts/build/app/outputs/bundle/release/app-release.aab
+            release-artifacts/*.apk
+            release-artifacts/*.aab
 
       # ------------------------------------------------------------------------
       # PRODUCTION STORE EXTENSIONS (Ready to enable when store accounts exist)
