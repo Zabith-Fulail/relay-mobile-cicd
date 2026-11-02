@@ -1,0 +1,68 @@
+name: "CI — Quality Gate (Analyze, Test & Coverage)"
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    name: "Lint, Test & Coverage Gate"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: "1. Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "2. Setup Flutter SDK (with Pub & SDK Cache)"
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+
+      - name: "3. Install Dependencies"
+        run: flutter pub get
+
+      - name: "4. Verify Code Formatting (dart format)"
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - name: "5. Run Static Analysis (flutter analyze)"
+        run: flutter analyze --fatal-infos
+
+      - name: "6. Run Unit & Widget Tests with Coverage"
+        run: flutter test --coverage --reporter expanded
+
+      - name: "7. Enforce Minimum Test Coverage Gate (>= 80%)"
+        shell: bash
+        run: |
+          if [ ! -f coverage/lcov.info ]; then
+            echo "::error::coverage/lcov.info was not generated!"
+            exit 1
+          fi
+          TOTAL_LINES=$(grep -E '^LF:' coverage/lcov.info | cut -d: -f2 | awk '{s+=$1} END {print s}')
+          HIT_LINES=$(grep -E '^LH:' coverage/lcov.info | cut -d: -f2 | awk '{s+=$1} END {print s}')
+          COVERAGE=$(awk "BEGIN {printf \"%.1f\", ($HIT_LINES / $TOTAL_LINES) * 100}")
+          echo "📊 Line Coverage: ${COVERAGE}% (${HIT_LINES}/${TOTAL_LINES} lines)"
+          echo "### 📊 Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **Line Coverage:** \`${COVERAGE}%\` (${HIT_LINES}/${TOTAL_LINES} lines)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Threshold:** \`80.0%\`" >> $GITHUB_STEP_SUMMARY
+          PASS=$(awk "BEGIN {print ($COVERAGE >= 80.0) ? 1 : 0}")
+          if [ "$PASS" -eq 0 ]; then
+            echo "::error::Coverage ${COVERAGE}% is below the required 80% threshold!"
+            exit 1
+          fi
+
+      - name: "8. Upload Coverage Report Artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-lcov-report
+          path: coverage/lcov.info
+          retention-days: 7
+
