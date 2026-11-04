@@ -21,11 +21,13 @@ class RelayApp extends StatefulWidget {
     this.initialConfig,
     this.releaseRepository = const CiCdReleaseRepository(),
     this.initialThemeMode = ThemeMode.system,
+    this.autoRefresh = true,
   });
 
   final AppConfig? initialConfig;
   final ReleaseRepository releaseRepository;
   final ThemeMode initialThemeMode;
+  final bool autoRefresh;
 
   @override
   State<RelayApp> createState() => _RelayAppState();
@@ -41,6 +43,7 @@ class _RelayAppState extends State<RelayApp> {
       releaseRepository: widget.releaseRepository,
       initialConfig: widget.initialConfig,
       initialThemeMode: widget.initialThemeMode,
+      autoRefresh: widget.autoRefresh,
     );
   }
 

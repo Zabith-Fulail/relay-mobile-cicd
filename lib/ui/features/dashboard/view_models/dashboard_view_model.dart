@@ -10,6 +10,7 @@ class DashboardViewModel extends ChangeNotifier {
     required ReleaseRepository releaseRepository,
     AppConfig? initialConfig,
     ThemeMode initialThemeMode = ThemeMode.system,
+    this.autoRefresh = true,
   }) : _releaseRepository = releaseRepository,
        _config = initialConfig ?? AppConfig.fromEnvironment(),
        _themeMode = initialThemeMode {
@@ -17,6 +18,7 @@ class DashboardViewModel extends ChangeNotifier {
   }
 
   final ReleaseRepository _releaseRepository;
+  final bool autoRefresh;
 
   AppConfig _config;
   AppConfig get config => _config;
@@ -73,30 +75,16 @@ class DashboardViewModel extends ChangeNotifier {
       ),
     ];
     _artifacts = const [];
-
-    // Initialize baseline values immediately
-    _runs = [
-      PipelineRun(
-        runNumber: int.tryParse(_config.buildNumber) ?? 42,
-        title:
-            'Release v${_config.appVersion} (${_config.environment.shortLabel})',
-        branchOrTag: 'v${_config.appVersion}',
-        commitSha: _config.gitCommit,
-        duration: '1m 42s',
-        coverage: 98.0,
-        timeAgo: 'Just now',
-        stages: _stages,
-      ),
-    ];
-    _artifacts = const [];
     _kpiMetrics = _releaseRepository.getKpiMetrics(
       _config,
       runs: _runs,
       stages: _stages,
     );
 
-    // Trigger live network fetch from GitHub API asynchronously
-    refreshData();
+    // Trigger live network fetch from GitHub API asynchronously if enabled
+    if (autoRefresh) {
+      refreshData();
+    }
   }
 
   /// Refreshes live telemetry from the GitHub Actions & Releases REST API.
@@ -152,7 +140,9 @@ class DashboardViewModel extends ChangeNotifier {
       stages: _stages,
     );
     notifyListeners();
-    refreshData();
+    if (autoRefresh) {
+      refreshData();
+    }
   }
 
   void cycleThemeMode() {
