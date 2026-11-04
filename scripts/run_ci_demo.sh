@@ -2,9 +2,10 @@
 # ==============================================================================
 # Relay Mobile — Live Mobile CI/CD Pipeline Runner (Android & iOS)
 # Usage:
-#   ./scripts/run_ci_demo.sh              # Full Mobile CI/CD (Format + Analyze + Test/Coverage + Android APK Release Build)
-#   ./scripts/run_ci_demo.sh --env=staging
-#   ./scripts/run_ci_demo.sh --with-ios   # Also builds iOS Release (flutter build ios --release --no-codesign)
+#   ./scripts/run_ci_demo.sh                                       # Full Mobile CI/CD (prod v1.2.0+42)
+#   ./scripts/run_ci_demo.sh --env=prod --version=2.0.0 --build=101 # Custom Production Release
+#   ./scripts/run_ci_demo.sh --env=staging                         # Staging Build
+#   ./scripts/run_ci_demo.sh --with-ios                            # Also builds iOS Release Archive
 # ==============================================================================
 
 set -euo pipefail
@@ -38,6 +39,12 @@ for arg in "$@"; do
   case $arg in
     --env=*)
       APP_ENV="${arg#*=}"
+      ;;
+    --version=*|-v=*)
+      APP_VERSION="${arg#*=}"
+      ;;
+    --build=*|-b=*)
+      BUILD_NUMBER="${arg#*=}"
       ;;
     --with-ios)
       WITH_IOS=true

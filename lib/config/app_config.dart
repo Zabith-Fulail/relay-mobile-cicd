@@ -33,6 +33,17 @@ enum AppEnvironment {
     }
   }
 
+  String get shortLabel {
+    switch (this) {
+      case AppEnvironment.dev:
+        return 'DEV';
+      case AppEnvironment.staging:
+        return 'STG';
+      case AppEnvironment.prod:
+        return 'PROD';
+    }
+  }
+
   String get defaultApiUrl {
     switch (this) {
       case AppEnvironment.dev:
@@ -44,14 +55,47 @@ enum AppEnvironment {
     }
   }
 
+  String get distributionChannel {
+    switch (this) {
+      case AppEnvironment.dev:
+        return 'Local ADB / Debug Simulator';
+      case AppEnvironment.staging:
+        return 'Firebase App Distribution (QA Group)';
+      case AppEnvironment.prod:
+        return 'Google Play & Apple TestFlight';
+    }
+  }
+
+  String get signingIdentity {
+    switch (this) {
+      case AppEnvironment.dev:
+        return 'Android Debug Keystore (SHA-1: 4A:9F...2C)';
+      case AppEnvironment.staging:
+        return 'CI Staging Key (upload-staging.jks)';
+      case AppEnvironment.prod:
+        return 'Prod Release Keystore (upload-keystore.jks)';
+    }
+  }
+
   Color get primaryColor {
     switch (this) {
       case AppEnvironment.dev:
-        return const Color(0xFF2563EB); // Blue for Dev
+        return const Color(0xFF3B82F6); // Electric Cyber Blue
       case AppEnvironment.staging:
-        return const Color(0xFFD97706); // Amber for Staging
+        return const Color(0xFFF59E0B); // Sunset Amber
       case AppEnvironment.prod:
-        return const Color(0xFF059669); // Emerald Green for Production
+        return const Color(0xFF10B981); // Emerald Neon Green
+    }
+  }
+
+  Color get secondaryColor {
+    switch (this) {
+      case AppEnvironment.dev:
+        return const Color(0xFF6366F1); // Indigo
+      case AppEnvironment.staging:
+        return const Color(0xFFEA580C); // Deep Orange
+      case AppEnvironment.prod:
+        return const Color(0xFF059669); // Deep Emerald
     }
   }
 
@@ -75,6 +119,8 @@ class AppConfig {
     required this.buildNumber,
     required this.gitCommit,
     required this.apiBaseUrl,
+    this.githubOwner = 'Zabith-Fulail',
+    this.githubRepo = 'relay-mobile-cicd',
   });
 
   /// Reads `--dart-define` values injected during `flutter build` or `flutter run`.
@@ -82,17 +128,25 @@ class AppConfig {
     const rawEnv = String.fromEnvironment('APP_ENV', defaultValue: 'dev');
     const appVersion = String.fromEnvironment(
       'APP_VERSION',
-      defaultValue: '1.0.0',
+      defaultValue: '1.2.0',
     );
     const buildNumber = String.fromEnvironment(
       'BUILD_NUMBER',
-      defaultValue: '1',
+      defaultValue: '42',
     );
     const gitCommit = String.fromEnvironment(
       'GIT_COMMIT',
-      defaultValue: 'local-dev',
+      defaultValue: '9fdb61d',
     );
     const customApiUrl = String.fromEnvironment('API_BASE_URL');
+    const githubOwner = String.fromEnvironment(
+      'GITHUB_OWNER',
+      defaultValue: 'Zabith-Fulail',
+    );
+    const githubRepo = String.fromEnvironment(
+      'GITHUB_REPO',
+      defaultValue: 'relay-mobile-cicd',
+    );
 
     final env = AppEnvironment.fromString(rawEnv);
     return AppConfig(
@@ -101,6 +155,8 @@ class AppConfig {
       buildNumber: buildNumber,
       gitCommit: gitCommit,
       apiBaseUrl: customApiUrl.isNotEmpty ? customApiUrl : env.defaultApiUrl,
+      githubOwner: githubOwner,
+      githubRepo: githubRepo,
     );
   }
 
@@ -109,6 +165,10 @@ class AppConfig {
   final String buildNumber;
   final String gitCommit;
   final String apiBaseUrl;
+  final String githubOwner;
+  final String githubRepo;
+
+  String get githubRepoSlug => '$githubOwner/$githubRepo';
 
   bool get isProduction => environment == AppEnvironment.prod;
   bool get showDebugBanner => !isProduction;

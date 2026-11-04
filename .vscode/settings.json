@@ -1,0 +1,214 @@
+{
+  // ============================================================================
+  // Android Studio — "Islands Dark" Theme for Antigravity
+  // Deep outer canvas (#131417) with elevated floating Islands (#191A1E / #1E1F22)
+  // ============================================================================
+  "editor.fontFamily": "'JetBrains Mono', 'SF Mono', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontSize": 13,
+  "editor.lineHeight": 21,
+  "editor.fontLigatures": true,
+  "editor.cursorBlinking": "smooth",
+  "editor.cursorWidth": 2,
+  "editor.renderLineHighlight": "all",
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.inlayHints.enabled": "on",
+  "editor.minimap.enabled": false,
+  "editor.stickyScroll.enabled": true,
+  "breadcrumbs.enabled": true,
+  "workbench.tree.indent": 16,
+  "workbench.tree.renderIndentGuides": "onHover",
+  "window.customTitleBarVisibility": "auto",
+  "workbench.colorTheme": "Dark+",
+  // Android Studio "Islands Dark" Workbench Palette
+  "workbench.colorCustomizations": {
+    // 1. Deep Outer Frame / Canvas between Islands (#121316)
+    "titleBar.activeBackground": "#121316",
+    "titleBar.activeForeground": "#DFE1E5",
+    "titleBar.inactiveBackground": "#121316",
+    "titleBar.inactiveForeground": "#6F737A",
+    "titleBar.border": "#121316",
+    "activityBar.background": "#121316",
+    "activityBar.foreground": "#DFE1E5",
+    "activityBar.inactiveForeground": "#6F737A",
+    "activityBar.border": "#121316",
+    "activityBar.activeBorder": "#3574F0",
+    "activityBar.activeBackground": "#252830",
+    "activityBarBadge.background": "#3574F0",
+    "activityBarBadge.foreground": "#FFFFFF",
+    "statusBar.background": "#121316",
+    "statusBar.foreground": "#868A91",
+    "statusBar.border": "#121316",
+    "statusBar.debuggingBackground": "#3574F0",
+    "statusBar.debuggingForeground": "#FFFFFF",
+    "statusBar.noFolderBackground": "#121316",
+    // 2. Island 1: Project Tool Window / Left Sidebar (#191B20 floating island)
+    "sideBar.background": "#191B20",
+    "sideBar.foreground": "#BCBEC4",
+    "sideBar.border": "#121316",
+    "sideBarTitle.foreground": "#DFE1E5",
+    "sideBarSectionHeader.background": "#1E2026",
+    "sideBarSectionHeader.foreground": "#DFE1E5",
+    "sideBarSectionHeader.border": "#121316",
+    // 3. Island 2: Main Code Editor Island (#1E1F22 with Pill/Island Tabs)
+    "editor.background": "#1E1F22",
+    "editor.foreground": "#BCBEC4",
+    "editorGutter.background": "#1E1F22",
+    "editor.lineHighlightBackground": "#25282E",
+    "editor.lineHighlightBorder": "#00000000",
+    "editor.selectionBackground": "#214283",
+    "editor.inactiveSelectionBackground": "#21428366",
+    "editorLineNumber.foreground": "#4E5157",
+    "editorLineNumber.activeForeground": "#CED0D6",
+    "editorCursor.foreground": "#DFE1E5",
+    "editorIndentGuide.background1": "#292B30",
+    "editorIndentGuide.activeBackground1": "#43454A",
+    "editorStickyScroll.background": "#1E1F22",
+    "editorStickyScrollHover.background": "#25282E",
+    "editorGroup.border": "#121316",
+    "editorGroupHeader.tabsBackground": "#121316",
+    "editorGroupHeader.tabsBorder": "#121316",
+    "editorGroupHeader.noTabsBackground": "#121316",
+    // Islands Dark Pill-Style Tabs
+    "tab.activeBackground": "#272930",
+    "tab.activeForeground": "#FFFFFF",
+    "tab.activeBorderTop": "#3574F0",
+    "tab.activeBorder": "#1E1F22",
+    "tab.inactiveBackground": "#121316",
+    "tab.inactiveForeground": "#7A7E85",
+    "tab.hoverBackground": "#1E2026",
+    "tab.hoverForeground": "#DFE1E5",
+    "tab.border": "#121316",
+    "tab.unfocusedActiveBackground": "#202227",
+    // Breadcrumbs bar inside Editor Island
+    "breadcrumb.background": "#1E1F22",
+    "breadcrumb.foreground": "#868A91",
+    "breadcrumb.focusForeground": "#DFE1E5",
+    // 4. Island 3: Bottom Terminal / Logcat / Run Island (#191B20)
+    "panel.background": "#191B20",
+    "panel.border": "#121316",
+    "panelSectionHeader.background": "#1E2026",
+    "panelTitle.activeForeground": "#FFFFFF",
+    "panelTitle.inactiveForeground": "#7A7E85",
+    "panelTitle.activeBorder": "#3574F0",
+    "terminal.background": "#191B20",
+    "terminal.foreground": "#BCBEC4",
+    "terminal.border": "#121316",
+    // 5. Floating Popups, Menus, Command Palette & Selection Pills
+    "quickInput.background": "#1E2026",
+    "quickInput.foreground": "#DFE1E5",
+    "editorWidget.background": "#1E2026",
+    "editorWidget.border": "#393B40",
+    "dropdown.background": "#1E2026",
+    "dropdown.border": "#393B40",
+    "list.activeSelectionBackground": "#263B63",
+    "list.activeSelectionForeground": "#FFFFFF",
+    "list.inactiveSelectionBackground": "#242936",
+    "list.inactiveSelectionForeground": "#DFE1E5",
+    "list.hoverBackground": "#22252C",
+    "list.focusBackground": "#263B63",
+    "input.background": "#14161A",
+    "input.border": "#393B40",
+    "input.foreground": "#DFE1E5",
+    "focusBorder": "#3574F0",
+    "button.background": "#3574F0",
+    "button.hoverBackground": "#4682FA",
+    "scrollbarSlider.background": "#43454A55",
+    "scrollbarSlider.hoverBackground": "#5A5D6388"
+  },
+  // Android Studio Islands Dark Syntax Highlighting
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "name": "Keywords (Copper Orange)",
+        "scope": [
+          "keyword",
+          "storage.type",
+          "storage.modifier",
+          "keyword.control",
+          "keyword.operator.new",
+          "keyword.operator.expression",
+          "constant.language"
+        ],
+        "settings": {
+          "foreground": "#CF8E6D"
+        }
+      },
+      {
+        "name": "Strings (Sage Green)",
+        "scope": [
+          "string",
+          "string.quoted",
+          "string.interpolated"
+        ],
+        "settings": {
+          "foreground": "#6AAB73"
+        }
+      },
+      {
+        "name": "Numbers (Cyan Blue)",
+        "scope": [
+          "constant.numeric"
+        ],
+        "settings": {
+          "foreground": "#2AACB8"
+        }
+      },
+      {
+        "name": "Annotations (@override, @Preview)",
+        "scope": [
+          "storage.type.annotation",
+          "meta.declaration.annotation",
+          "entity.name.function.decorator",
+          "punctuation.definition.annotation"
+        ],
+        "settings": {
+          "foreground": "#B3AE60"
+        }
+      },
+      {
+        "name": "Function & Method Declarations",
+        "scope": [
+          "entity.name.function",
+          "support.function"
+        ],
+        "settings": {
+          "foreground": "#56A8F5"
+        }
+      },
+      {
+        "name": "Classes & Types",
+        "scope": [
+          "entity.name.type",
+          "entity.name.class",
+          "support.class"
+        ],
+        "settings": {
+          "foreground": "#DFE1E5"
+        }
+      },
+      {
+        "name": "Instance Fields & Properties (Purple)",
+        "scope": [
+          "variable.other.property",
+          "variable.other.object.property",
+          "support.variable.property"
+        ],
+        "settings": {
+          "foreground": "#C77DBB"
+        }
+      },
+      {
+        "name": "Comments",
+        "scope": [
+          "comment",
+          "punctuation.definition.comment"
+        ],
+        "settings": {
+          "foreground": "#7A7E85",
+          "fontStyle": "italic"
+        }
+      }
+    ]
+  }
+}

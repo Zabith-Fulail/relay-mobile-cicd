@@ -190,20 +190,32 @@ jobs:
             release-artifacts/*.aab
 
       # ------------------------------------------------------------------------
-      # PRODUCTION STORE EXTENSIONS (Ready to enable when store accounts exist)
+      # PRODUCTION STORE DISTRIBUTION PIPELINES
       # ------------------------------------------------------------------------
-      # - name: "Distribute to Firebase App Distribution (QA Testers)"
+      # 1. Google Play Console (Upload signed AAB to Internal/Production Track)
+      # - name: "Upload AAB to Google Play Console"
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+      #     packageName: com.example.relay_mobile
+      #     releaseFiles: release-artifacts/*.aab
+      #     track: internal # Options: internal, alpha, beta, production
+      #     status: completed
+      #
+      # 2. Apple App Store & TestFlight (Upload signed IPA via App Store Connect API)
+      # - name: "Upload IPA to Apple TestFlight & App Store"
+      #   uses: apple-actions/upload-testflight-build@v1
+      #   with:
+      #     app-path: "build/ios/ipa/*.ipa"
+      #     issuer-id: ${{ secrets.APP_STORE_ISSUER_ID }}
+      #     api-key-id: ${{ secrets.APP_STORE_KEY_ID }}
+      #     api-private-key: ${{ secrets.APP_STORE_PRIVATE_KEY_P8 }}
+      #
+      # 3. Firebase App Distribution (Ad-hoc QA/Staging APK distribution)
+      # - name: "Distribute to Firebase App Distribution"
       #   uses: wzieba/Firebase-Distribution-Github-Action@v1
       #   with:
       #     appId: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
       #     serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
       #     groups: qa-team
-      #     file: release-artifacts/build/app/outputs/flutter-apk/app-release.apk
-      #
-      # - name: "Upload AAB to Google Play Internal Track"
-      #   uses: r0adkll/upload-google-play@v1
-      #   with:
-      #     serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-      #     packageName: com.example.relay_mobile
-      #     releaseFiles: release-artifacts/build/app/outputs/bundle/release/app-release.aab
-      #     track: internal
+      #     file: release-artifacts/*.apk

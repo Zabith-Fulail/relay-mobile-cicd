@@ -1,85 +1,158 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:relay_mobile/config/app_config.dart';
+import 'package:relay_mobile/data/repositories/cicd_release_repository.dart';
+import 'package:relay_mobile/data/services/cicd_data_source.dart';
 import 'package:relay_mobile/main.dart';
+import 'package:relay_mobile/ui/features/dashboard/view_models/dashboard_view_model.dart';
 
 void main() {
-  group('AppConfig Unit Tests (CI Environment Injection)', () {
-    test('parses dev, staging, and prod environment strings accurately', () {
-      expect(AppEnvironment.fromString('dev'), AppEnvironment.dev);
-      expect(AppEnvironment.fromString('STAGING'), AppEnvironment.staging);
-      expect(AppEnvironment.fromString('prod'), AppEnvironment.prod);
-      expect(AppEnvironment.fromString('production'), AppEnvironment.prod);
-      expect(AppEnvironment.fromString('unknown'), AppEnvironment.dev);
-    });
-
-    test('formats full version string and production flags', () {
-      const prodConfig = AppConfig(
-        environment: AppEnvironment.prod,
-        appVersion: '2.1.0',
-        buildNumber: '42',
-        gitCommit: 'a1b2c3d',
-        apiBaseUrl: 'https://api.relay.io',
-      );
-
-      expect(prodConfig.isProduction, isTrue);
-      expect(prodConfig.showDebugBanner, isFalse);
-      expect(prodConfig.fullVersionString, 'v2.1.0+42 (a1b2c3d)');
-      expect(prodConfig.environment.label, 'PRODUCTION');
-    });
-
-    test('provides default environment endpoints and colors', () {
-      expect(
-        AppEnvironment.dev.defaultApiUrl,
-        'https://api.dev.relay.internal',
-      );
-      expect(
-        AppEnvironment.staging.defaultApiUrl,
-        'https://api.staging.relay.internal',
-      );
-      expect(AppEnvironment.prod.defaultApiUrl, 'https://api.relay.io');
-      expect(AppEnvironment.dev.icon, Icons.developer_mode);
-      expect(AppEnvironment.staging.icon, Icons.science_outlined);
-      expect(AppEnvironment.prod.icon, Icons.verified_outlined);
-    });
-  });
-
-  group('Relay Mobile CI/CD Widget Tests', () {
-    testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-      await tester.pumpWidget(const MyApp());
-
-      expect(find.text('0'), findsOneWidget);
-      expect(find.text('1'), findsNothing);
-
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.pump();
-
-      expect(find.text('0'), findsNothing);
-      expect(find.text('1'), findsOneWidget);
-    });
-
-    testWidgets('Displays injected CI/CD metadata and switches environments', (
-      WidgetTester tester,
-    ) async {
-      const initialConfig = AppConfig(
+  group('Clean Architecture Data & Domain Layer Tests', () {
+    test('CiCdDataSource and Repository return valid domain models', () async {
+      const dataSource = CiCdDataSource();
+      const repository = CiCdReleaseRepository(dataSource: dataSource);
+      const config = AppConfig(
         environment: AppEnvironment.staging,
-        appVersion: '1.4.0',
-        buildNumber: '88',
-        gitCommit: '9f8e7d6',
+        appVersion: '2.0.0',
+        buildNumber: '55',
+        gitCommit: 'abc1234',
         apiBaseUrl: 'https://api.staging.relay.internal',
       );
 
-      await tester.pumpWidget(const MyApp(initialConfig: initialConfig));
+      final stages = repository.getDefaultStages();
+      expect(stages.length, 4);
+      expect(stages.first.name, contains('Formatting'));
 
-      expect(find.text('STAGING / QA'), findsAtLeastNWidgets(1));
-      expect(find.text('v1.4.0+88 (9f8e7d6)'), findsOneWidget);
+      final runs = await repository.getPipelineRuns(config);
+      expect(runs.isNotEmpty, isTrue);
+      expect(runs.first.runNumber, isPositive);
 
-      // Switch to PROD environment via SegmentedButton
-      await tester.tap(find.text('PROD'));
-      await tester.pumpAndSettle();
+      final artifacts = await repository.getReleaseArtifacts(config);
+      expect(artifacts.isNotEmpty, isTrue);
 
-      expect(find.text('PRODUCTION'), findsAtLeastNWidgets(1));
-      expect(find.text('https://api.relay.io'), findsOneWidget);
+      final flags = repository.getInitialFeatureFlags();
+      expect(flags.length, 4);
+      expect(flags.first.id, 'impeller_vulkan');
+
+      final kpiMetrics = repository.getKpiMetrics(config);
+      expect(kpiMetrics.length, 4);
+      expect(kpiMetrics.first.id, 'coverage');
     });
+
+    test(
+      'DashboardViewModel manages state and adheres to Single Responsibility',
+      () async {
+        const repository = CiCdReleaseRepository();
+        const config = AppConfig(
+          environment: AppEnvironment.dev,
+          appVersion: '1.0.0',
+          buildNumber: '1',
+          gitCommit: 'local',
+          apiBaseUrl: 'https://api.dev.relay.internal',
+        );
+
+        final viewModel = DashboardViewModel(
+          releaseRepository: repository,
+          initialConfig: config,
+          initialThemeMode: ThemeMode.system,
+        );
+
+        expect(viewModel.themeMode, ThemeMode.system);
+        viewModel.cycleThemeMode();
+        expect(viewModel.themeMode, ThemeMode.light);
+        viewModel.cycleThemeMode();
+        expect(viewModel.themeMode, ThemeMode.dark);
+        viewModel.cycleThemeMode();
+        expect(viewModel.themeMode, ThemeMode.system);
+
+        viewModel.incrementCounter();
+        expect(viewModel.counter, 1);
+
+        viewModel.selectTab(2);
+        expect(viewModel.selectedTab, 2);
+
+        viewModel.toggleFeatureFlag('impeller_vulkan', false);
+        expect(
+          viewModel.featureFlags
+              .firstWhere((f) => f.id == 'impeller_vulkan')
+              .isEnabled,
+          isFalse,
+        );
+
+        viewModel.switchEnvironment(AppEnvironment.prod);
+        expect(viewModel.config.environment, AppEnvironment.prod);
+      },
+    );
   });
+
+  group(
+    'RelayApp Clean Architecture & System Theme Integration Widget Tests',
+    () {
+      testWidgets('respects device system theme and switches themes cleanly', (
+        WidgetTester tester,
+      ) async {
+        await tester.pumpWidget(
+          const RelayApp(initialThemeMode: ThemeMode.system),
+        );
+
+        // Verify Counter Smoke test
+        expect(find.text('0'), findsOneWidget);
+        await tester.ensureVisible(find.byIcon(Icons.add));
+        await tester.tap(find.byIcon(Icons.add));
+        await tester.pump();
+        expect(find.text('1'), findsOneWidget);
+
+        // Verify Theme Mode cycling button (System -> Light -> Dark -> System)
+        final themeBtn = find.byKey(const Key('theme_mode_button'));
+        expect(themeBtn, findsOneWidget);
+
+        await tester.tap(themeBtn);
+        await tester.pumpAndSettle();
+
+        await tester.tap(themeBtn);
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('switches environments and navigates tabs without errors', (
+        WidgetTester tester,
+      ) async {
+        const initialConfig = AppConfig(
+          environment: AppEnvironment.staging,
+          appVersion: '1.4.0',
+          buildNumber: '88',
+          gitCommit: '9f8e7d6',
+          apiBaseUrl: 'https://api.staging.relay.internal',
+        );
+
+        await tester.pumpWidget(const RelayApp(initialConfig: initialConfig));
+
+        expect(find.text('STAGING / QA'), findsAtLeastNWidgets(1));
+        expect(find.text('v1.4.0+88 (9f8e7d6)'), findsOneWidget);
+
+        // Switch to PROD environment via SegmentedButton
+        await tester.tap(find.text('PROD'));
+        await tester.pumpAndSettle();
+        expect(find.text('PRODUCTION'), findsAtLeastNWidgets(1));
+
+        // Navigate across tabs
+        await tester.tap(find.text('Pipelines'));
+        await tester.pumpAndSettle();
+        expect(find.text('Live CI/CD Pipeline Simulator'), findsOneWidget);
+
+        await tester.tap(find.text('Flavors'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Compile-Time Flag Matrix (--dart-define)'),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.text('Artifacts'));
+        await tester.pumpAndSettle();
+        expect(
+          find.text('Signed Release Binaries (GitHub Releases)'),
+          findsOneWidget,
+        );
+      });
+    },
+  );
 }

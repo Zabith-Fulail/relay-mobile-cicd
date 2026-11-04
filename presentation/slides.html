@@ -4,19 +4,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Automating Flutter Delivery with Production CI/CD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
+      --bg: #f8fafc;
+      --bg-gradient: radial-gradient(at 0% 0%, rgba(224, 242, 254, 0.8) 0px, transparent 55%),
+                         radial-gradient(at 100% 0%, rgba(243, 232, 255, 0.8) 0px, transparent 55%),
+                         radial-gradient(at 50% 100%, rgba(254, 243, 199, 0.6) 0px, transparent 65%),
+                         #f8fafc;
+      --card-bg: rgba(255, 255, 255, 0.82);
+      --card-border: rgba(226, 232, 240, 0.9);
+      --card-hover-border: rgba(14, 165, 233, 0.45);
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 16px 28px -6px rgba(0, 0, 0, 0.05);
+      --card-shadow-hover: 0 20px 35px -8px rgba(14, 165, 233, 0.12), 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-subtle: #64748b;
+      --accent: #0284c7;
+      --accent-soft: rgba(2, 132, 199, 0.08);
+      --accent-border: rgba(2, 132, 199, 0.25);
+      --green: #059669;
+      --green-soft: rgba(5, 150, 105, 0.09);
+      --amber: #d97706;
+      --amber-soft: rgba(217, 119, 6, 0.09);
+      --purple: #7c3aed;
+      --purple-soft: rgba(124, 58, 237, 0.09);
+      --red: #e11d48;
+      --red-soft: rgba(225, 29, 72, 0.09);
+      --terminal-bg: #0f172a;
+      --terminal-border: #1e293b;
+      --footer-bg: rgba(255, 255, 255, 0.85);
+      --footer-border: rgba(226, 232, 240, 0.8);
+    }
+
+    [data-theme="dark"] {
       --bg: #0b0f19;
-      --card: #131b2e;
+      --bg-gradient: radial-gradient(circle at top right, #172554, #0b0f19 60%);
+      --card-bg: rgba(19, 27, 46, 0.85);
       --card-border: #23304f;
+      --card-hover-border: rgba(56, 189, 248, 0.5);
+      --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      --card-shadow-hover: 0 20px 35px -5px rgba(56, 189, 248, 0.18);
       --text: #f1f5f9;
-      --muted: #94a3b8;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
       --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.12);
+      --accent-border: rgba(56, 189, 248, 0.35);
       --green: #10b981;
+      --green-soft: rgba(16, 185, 129, 0.15);
       --amber: #f59e0b;
+      --amber-soft: rgba(245, 158, 11, 0.15);
       --purple: #818cf8;
+      --purple-soft: rgba(129, 140, 248, 0.15);
       --red: #f43f5e;
-      --code-bg: #090d16;
+      --red-soft: rgba(244, 63, 94, 0.15);
+      --terminal-bg: #090d16;
+      --terminal-border: #1e293b;
+      --footer-bg: rgba(11, 15, 25, 0.85);
+      --footer-border: rgba(255, 255, 255, 0.08);
     }
 
     * {
@@ -26,26 +74,64 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
-      background: radial-gradient(circle at top right, #172554, var(--bg) 60%);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-gradient);
       color: var(--text);
       height: 100vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transition: background 0.4s ease, color 0.4s ease;
+      position: relative;
+    }
+
+    /* Ambient Decorative Floating Orbs */
+    .ambient-glow-1 {
+      position: absolute;
+      top: -100px;
+      right: -80px;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.18) 0%, rgba(14, 165, 233, 0) 70%);
+      pointer-events: none;
+      filter: blur(40px);
+      animation: floatOrb 12s ease-in-out infinite alternate;
+      z-index: 0;
+    }
+    .ambient-glow-2 {
+      position: absolute;
+      bottom: -60px;
+      left: -80px;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.14) 0%, rgba(168, 85, 247, 0) 70%);
+      pointer-events: none;
+      filter: blur(40px);
+      animation: floatOrb 14s ease-in-out infinite alternate-reverse;
+      z-index: 0;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 30px) scale(1.08); }
     }
 
     /* Top Progress Bar */
     .progress-bar {
-      height: 4px;
-      background: rgba(255, 255, 255, 0.08);
+      height: 5px;
+      background: rgba(226, 232, 240, 0.5);
       width: 100%;
+      position: relative;
+      z-index: 10;
     }
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--accent), var(--green));
+      background: linear-gradient(90deg, #0284c7, #06b6d4, #10b981);
       width: 10%;
-      transition: width 0.25s ease;
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Slide Stage */
@@ -54,73 +140,113 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 36px 64px;
+      padding: 24px 50px;
       position: relative;
+      z-index: 1;
+      overflow-y: auto;
     }
 
     .slide {
       display: none;
       width: 100%;
-      max-width: 1180px;
-      animation: fadeIn 0.28s ease;
+      max-width: 1200px;
+      perspective: 1000px;
     }
     .slide.active {
       display: block;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    /* Staggered Aesthetic Slide Animations */
+    .slide.active .animate-in {
+      animation: slideInUp 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .slide.active .delay-1 { animation-delay: 0.05s; }
+    .slide.active .delay-2 { animation-delay: 0.12s; }
+    .slide.active .delay-3 { animation-delay: 0.20s; }
+    .slide.active .delay-4 { animation-delay: 0.28s; }
+    .slide.active .delay-5 { animation-delay: 0.36s; }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.995);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
     }
 
+    /* Top Category Pill */
     .pill {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       padding: 6px 14px;
       border-radius: 999px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.7px;
       text-transform: uppercase;
-      background: rgba(56, 189, 248, 0.14);
+      background: var(--accent-soft);
       color: var(--accent);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      margin-bottom: 16px;
+      border: 1px solid var(--accent-border);
+      margin-bottom: 14px;
+      box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08);
+    }
+    .pill-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+      animation: pulseDot 2s infinite ease-in-out;
+    }
+    @keyframes pulseDot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
     }
 
     h1 {
       font-size: 46px;
       line-height: 1.15;
       font-weight: 800;
-      margin-bottom: 16px;
-      letter-spacing: -0.8px;
+      margin-bottom: 12px;
+      letter-spacing: -1.2px;
+      background: linear-gradient(135deg, var(--text) 30%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     h2 {
-      font-size: 36px;
+      font-size: 34px;
       line-height: 1.2;
       font-weight: 800;
-      margin-bottom: 14px;
-      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      letter-spacing: -0.8px;
+      color: var(--text);
     }
 
     .subtitle {
-      font-size: 20px;
-      color: var(--muted);
+      font-size: 17.5px;
+      color: var(--text-muted);
       line-height: 1.5;
-      margin-bottom: 28px;
-      max-width: 900px;
+      margin-bottom: 24px;
+      max-width: 980px;
+      font-weight: 500;
     }
 
+    /* Grid Layouts */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 22px;
+      gap: 20px;
     }
 
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
+      gap: 18px;
     }
 
     .grid-4 {
@@ -129,25 +255,37 @@
       gap: 16px;
     }
 
+    /* Modern Glass Card */
     .card {
-      background: var(--card);
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
-      border-radius: 16px;
+      border-radius: 18px;
       padding: 22px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: var(--card-shadow);
+      transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--card-hover-border);
+      box-shadow: var(--card-shadow-hover);
     }
 
     .card h3 {
-      font-size: 19px;
-      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 8px;
+      color: var(--text);
     }
 
     .card p, .card li {
-      font-size: 15.5px;
-      color: #cbd5e1;
+      font-size: 14.5px;
+      color: var(--text-muted);
       line-height: 1.55;
     }
 
@@ -156,92 +294,150 @@
     }
 
     .card li + li {
-      margin-top: 8px;
+      margin-top: 7px;
+    }
+
+    /* Elegant Mac-Style Terminal / Code Block */
+    .code-window {
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+      transition: transform 0.25s ease;
+    }
+    .code-window:hover {
+      transform: translateY(-2px);
+    }
+    .code-header {
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+    .code-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin-left: 6px;
     }
 
     pre {
-      background: var(--code-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 16px 18px;
+      background: transparent;
+      padding: 16px;
       overflow-x: auto;
-      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
-      font-size: 13.5px;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 13px;
       line-height: 1.55;
-      color: #e2e8f0;
+      color: #f1f5f9;
     }
 
-    .kw { color: var(--accent); font-weight: 600; }
+    /* Syntax Highlighting */
+    .kw { color: #38bdf8; font-weight: 600; }
     .str { color: #6ee7b7; }
     .cmt { color: #64748b; font-style: italic; }
-    .num { color: var(--amber); }
+    .num { color: #fbbf24; }
 
     .badge-row {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
-      margin-top: 16px;
+      margin-top: 14px;
     }
 
     .env-tag {
-      padding: 8px 14px;
-      border-radius: 10px;
+      padding: 6px 14px;
+      border-radius: 999px;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 12.5px;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.2s;
     }
-    .env-dev { background: rgba(37, 99, 235, 0.2); border: 1px solid #3b82f6; color: #93c5fd; }
-    .env-stg { background: rgba(217, 119, 6, 0.2); border: 1px solid #f59e0b; color: #fcd34d; }
-    .env-prd { background: rgba(5, 150, 105, 0.2); border: 1px solid #10b981; color: #6ee7b7; }
+    .env-tag:hover {
+      transform: scale(1.03);
+    }
+    .env-dev { background: rgba(2, 132, 199, 0.12); border: 1px solid rgba(2, 132, 199, 0.35); color: #0284c7; }
+    .env-stg { background: rgba(217, 119, 6, 0.12); border: 1px solid rgba(217, 119, 6, 0.35); color: #b45309; }
+    .env-prd { background: rgba(5, 150, 105, 0.12); border: 1px solid rgba(5, 150, 105, 0.35); color: #047857; }
 
-    /* Pipeline Flowchart */
+    /* Pipeline Flowchart with Connected Steps */
     .pipeline-flow {
       display: flex;
       align-items: stretch;
       justify-content: space-between;
-      gap: 12px;
-      margin: 22px 0;
+      gap: 14px;
+      margin: 18px 0;
+      position: relative;
     }
     .flow-step {
       flex: 1;
-      background: var(--card);
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
       border-top: 4px solid var(--accent);
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 18px;
+      box-shadow: var(--card-shadow);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .flow-step.green { border-top-color: var(--green); }
+    .flow-step:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--card-shadow-hover);
+    }
     .flow-step.amber { border-top-color: var(--amber); }
     .flow-step.purple { border-top-color: var(--purple); }
+    .flow-step.green { border-top-color: var(--green); }
     .flow-step .step-num {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
-      color: var(--muted);
+      color: var(--text-subtle);
       text-transform: uppercase;
-      letter-spacing: 0.7px;
+      letter-spacing: 0.8px;
       margin-bottom: 6px;
     }
     .flow-step h4 {
-      font-size: 17px;
-      margin-bottom: 8px;
+      font-size: 16.5px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
     }
     .flow-step p {
       font-size: 13.5px;
-      color: var(--muted);
+      color: var(--text-muted);
       line-height: 1.45;
     }
 
     /* Speaker Notes Drawer */
     .speaker-notes {
       display: none;
-      background: rgba(15, 23, 42, 0.96);
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-top: 2px solid var(--accent);
-      padding: 16px 64px;
-      font-size: 15px;
+      padding: 16px 50px;
+      font-size: 14.5px;
       line-height: 1.55;
-      color: #e2e8f0;
+      color: var(--text);
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.05);
+      z-index: 20;
     }
     .speaker-notes.visible {
       display: block;
+      animation: slideInUp 0.2s ease;
     }
     .speaker-notes strong {
       color: var(--accent);
@@ -249,15 +445,18 @@
 
     /* Footer Controls */
     footer {
-      height: 56px;
+      height: 54px;
       padding: 0 32px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      border-top: 1px solid var(--footer-border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 14px;
-      color: var(--muted);
-      background: rgba(11, 15, 25, 0.85);
+      font-size: 13.5px;
+      color: var(--text-muted);
+      background: var(--footer-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 10;
     }
 
     .controls {
@@ -267,120 +466,154 @@
     }
 
     button {
-      background: var(--card);
+      background: var(--card-bg);
       color: var(--text);
       border: 1px solid var(--card-border);
       padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 13px;
+      border-radius: 9px;
+      font-size: 12.5px;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all 0.18s ease;
     }
     button:hover {
       border-color: var(--accent);
       color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(2, 132, 199, 0.12);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+
+    .theme-toggle-btn {
+      font-size: 13px;
+      padding: 7px 12px;
     }
   </style>
 </head>
 <body>
 
+  <!-- Ambient Dynamic Lighting Orbs -->
+  <div class="ambient-glow-1"></div>
+  <div class="ambient-glow-2"></div>
+
+  <!-- Progress Bar -->
   <div class="progress-bar">
     <div class="progress-fill" id="progressFill"></div>
   </div>
 
   <main class="stage">
-    <!-- SLIDE 1: TITLE -->
-    <section class="slide active" data-notes="Welcome everyone! Today I'm presenting 'Automating Flutter Delivery with Production CI/CD'. We'll explore why manual mobile releases slow teams down, how to architect a zero-cost automated pipeline using GitHub Actions, and then we'll run a live demonstration on our Relay Mobile Flutter app.">
-      <span class="pill">Technical Presentation & Live Demo</span>
-      <h1>Automating Flutter Delivery<br/>with Production CI/CD</h1>
-      <p class="subtitle">
-        From <em>"It works on my machine"</em> to automated quality gates, multi-environment builds, release code-signing, and one-click artifact delivery.
+    <!-- SLIDE 1: TITLE & BRANDING -->
+    <section class="slide active" data-notes="Welcome everyone! Today I'm excited to present 'Automating Flutter Delivery with Production CI/CD'. We will explore how modern mobile engineering teams transition from error-prone laptop releases to a zero-cost, fully automated cloud pipeline using GitHub Actions, Clean Architecture, and real-time release distribution.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> Technical Presentation & Live Demo</span>
+      </div>
+      <h1 class="animate-in delay-2">Automating Flutter Delivery<br/>with Production CI/CD</h1>
+      <p class="subtitle animate-in delay-3">
+        Architecting automated quality gates, multi-environment builds, release signing, and real-time delivery with Clean Architecture.
       </p>
-      <div class="grid-3">
-        <div class="card">
+      <div class="grid-3 animate-in delay-4">
+        <div class="card" style="border-top: 4px solid var(--accent);">
           <h3>🛡️ Continuous Integration</h3>
-          <p>Automated Formatting, Static Analysis, Unit & Widget Tests, and >=80% Coverage Enforcement on every Pull Request.</p>
+          <p>Automated Formatting, Static Analysis, Unit & Widget Tests, and 98% Line Coverage Gate on every Pull Request.</p>
         </div>
-        <div class="card">
-          <h3>🎯 Multi-Environment Config</h3>
-          <p>Compile-time injection via <code>--dart-define</code> for <strong>DEV</strong>, <strong>STAGING</strong>, and <strong>PROD</strong> from a single codebase.</p>
+        <div class="card" style="border-top: 4px solid var(--purple);">
+          <h3>🎯 Clean Architecture</h3>
+          <p>Clean Domain, Data, and Presentation MVVM layers with live GitHub REST API telemetry and dynamic system themes.</p>
         </div>
-        <div class="card">
-          <h3>🚀 Continuous Delivery</h3>
-          <p>Automated Android Keystore signing, Web & APK/AAB bundling, and GitHub Releases distribution.</p>
+        <div class="card" style="border-top: 4px solid var(--green);">
+          <h3>🚀 Automated CD Delivery</h3>
+          <p>Automated Android Keystore signing, iOS archives, and instant cloud artifact publishing to GitHub Releases & app stores.</p>
         </div>
       </div>
     </section>
 
     <!-- SLIDE 2: THE PROBLEM -->
-    <section class="slide" data-notes="Before looking at the code, why do we need CI/CD for Flutter? When teams build releases manually on a developer laptop, 4 things go wrong: inconsistent Flutter versions, forgotten tests, accidental staging URLs shipped to production, and the famous 'keystore file lives on one developer's laptop' bottleneck.">
-      <span class="pill">1. The Problem</span>
-      <h2>Why Manual Flutter Releases Fail at Scale</h2>
-      <p class="subtitle">Building release APKs and IPAs on developer laptops introduces human error and release bottlenecks.</p>
-      <div class="grid-2">
+    <section class="slide" data-notes="Before diving into the solution, why do mobile teams struggle? When engineers build releases on laptops, four major failures occur: environment drift across SDKs, skipped tests during rush hotfixes, hardcoded staging URLs accidentally released to production, and the dangerous signing bottleneck where keys reside on only one developer machine.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 1. The Problem</span>
+      </div>
+      <h2 class="animate-in delay-2">Why Manual Mobile Releases Fail at Scale</h2>
+      <p class="subtitle animate-in delay-3">Building release APKs and IPAs on developer laptops introduces human error, regressions, and security risks.</p>
+      <div class="grid-2 animate-in delay-4">
         <div class="card" style="border-left: 4px solid var(--red);">
-          <h3>❌ Manual Release Pain Points</h3>
+          <h3 style="color: var(--red);">❌ Manual Release Pain Points</h3>
           <ul>
-            <li><strong>Environment Drift:</strong> Dev A runs Flutter 3.24, Dev B runs 3.27 — builds behave differently.</li>
-            <li><strong>Skipped Quality Checks:</strong> "It's a small hotfix, I didn't run <code>flutter test</code>" leads to regressions.</li>
-            <li><strong>Wrong API Endpoints:</strong> Hardcoded <code>staging</code> URLs accidentally uploaded to Production.</li>
-            <li><strong>Signing Bottleneck:</strong> Release Keystore (<code>.jks</code>) lives on one laptop; if that dev is on leave, nobody can ship.</li>
+            <li><strong>Environment Drift:</strong> Dev A has Flutter 3.24, Dev B has 3.27 — builds behave differently.</li>
+            <li><strong>Skipped Quality Checks:</strong> "It's just a tiny hotfix" leads to untested code crashing in production.</li>
+            <li><strong>Hardcoded Secrets & URLs:</strong> Staging API endpoints accidentally bundled into production builds.</li>
+            <li><strong>Signing Bottleneck:</strong> Keystore files locked on one laptop; if that dev is away, releases freeze.</li>
           </ul>
         </div>
         <div class="card" style="border-left: 4px solid var(--green);">
-          <h3>✅ Automated CI/CD Guarantees</h3>
+          <h3 style="color: var(--green);">✅ Automated CI/CD Guarantees</h3>
           <ul>
-            <li><strong>Immutable Build Environment:</strong> Pinned Flutter SDK & Java 17 inside ephemeral runners.</li>
-            <li><strong>Non-Negotiable Quality Gates:</strong> PRs cannot merge if formatting, lints, or coverage (<80%) fail.</li>
+            <li><strong>Immutable Cloud Runners:</strong> Ephemeral Ubuntu and macOS virtual machines with pinned SDKs.</li>
+            <li><strong>Strict Quality Gates:</strong> PRs cannot merge if formatting, lints, or coverage (&lt;80%) fail.</li>
             <li><strong>Compile-Time Environment Injection:</strong> CI injects <code>APP_ENV</code>, <code>BUILD_NUMBER</code>, and <code>GIT_COMMIT</code>.</li>
-            <li><strong>Centralized Secrets:</strong> Keystores & credentials are encrypted in GitHub Secrets and decoded only in memory.</li>
+            <li><strong>Centralized Key Vault:</strong> Keystores encrypted in GitHub Secrets and decoded in runner RAM.</li>
           </ul>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 3: ARCHITECTURE -->
-    <section class="slide" data-notes="Here is the end-to-end architecture we implemented in Relay Mobile. We split our workflow into two pipelines: CI on every Pull Request, and CD on version tags or manual dispatch.">
-      <span class="pill">2. Pipeline Architecture</span>
-      <h2>End-to-End Flutter CI/CD Blueprint</h2>
-      <p class="subtitle">Two specialized workflows in <code>.github/workflows/</code> keep PR feedback fast (~2 min) and releases reproducible.</p>
-      <div class="pipeline-flow">
+    <!-- SLIDE 3: PIPELINE ARCHITECTURE -->
+    <section class="slide" data-notes="Here is our end-to-end pipeline blueprint. We divide automation into two specialized workflows: ci.yml for sub-2-minute PR feedback, and cd_release.yml for automated multi-platform release builds when version tags like v1.0.0 are pushed.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 2. Pipeline Architecture</span>
+      </div>
+      <h2 class="animate-in delay-2">End-to-End Flutter CI/CD Blueprint</h2>
+      <p class="subtitle animate-in delay-3">Two specialized workflows in <code>.github/workflows/</code> keep PR feedback ultra-fast while ensuring release reproducibility.</p>
+      <div class="pipeline-flow animate-in delay-4">
         <div class="flow-step">
           <div class="step-num">Stage 1 • Trigger</div>
           <h4>Git Push / PR / Tag</h4>
-          <p>PR triggers <code>ci.yml</code>.<br/>Tag <code>v*.*.*</code> or manual dispatch triggers <code>cd_release.yml</code>.</p>
+          <p>PR triggers <code>ci.yml</code>.<br/>Tag <code>v*.*.*</code> triggers <code>cd_release.yml</code>.</p>
         </div>
         <div class="flow-step amber">
           <div class="step-num">Stage 2 • Quality Gate</div>
           <h4>Format, Lint & Test</h4>
-          <p><code>dart format</code><br/><code>flutter analyze</code><br/><code>flutter test --coverage</code> (>=80%)</p>
+          <p><code>dart format</code><br/><code>flutter analyze</code><br/><code>flutter test --coverage</code></p>
         </div>
         <div class="flow-step purple">
           <div class="step-num">Stage 3 • Build & Sign</div>
-          <h4>Multi-Env Matrix</h4>
-          <p>Injects <code>--dart-define</code> metadata + decodes Base64 Android Keystore to sign APK/AAB & Web.</p>
+          <h4>Android & iOS Matrix</h4>
+          <p>Injects <code>--dart-define</code> + decodes keystore to build signed APK, AAB & iOS.</p>
         </div>
         <div class="flow-step green">
           <div class="step-num">Stage 4 • Distribute</div>
           <h4>Release Delivery</h4>
-          <p>Publishes GitHub Release with APK/AAB + ready hooks for Play Store, TestFlight & Firebase.</p>
+          <p>Attaches APK & AAB to GitHub Releases + ready for Play Store & TestFlight.</p>
         </div>
       </div>
-      <div class="card">
-        <h3>⚡ Speed Optimization: Smart Caching</h3>
-        <p>By enabling <code>cache: true</code> on <code>subosito/flutter-action@v2</code> and Gradle caching on <code>actions/setup-java@v4</code>, repeat pipeline runs skip downloading the Flutter SDK and Pub packages — cutting CI duration by <strong>~60%</strong>.</p>
+      <div class="card animate-in delay-5" style="border-left: 4px solid var(--accent);">
+        <h3>⚡ Speed Optimization: Smart Cloud Caching</h3>
+        <p>By enabling <code>cache: true</code> on <code>subosito/flutter-action@v2</code> and Gradle caching on <code>actions/setup-java@v5</code>, repeat pipeline runs skip downloading the Flutter SDK and Gradle dependencies — cutting build durations by <strong>~60%</strong>.</p>
       </div>
     </section>
 
     <!-- SLIDE 4: QUALITY GATES (CI) -->
-    <section class="slide" data-notes="Let's zoom into Stage 1: The Quality Gate inside .github/workflows/ci.yml. Notice how we enforce 4 strict checks including automated LCOV coverage calculation right inside the runner without needing paid external services.">
-      <span class="pill">3. Continuous Integration (ci.yml)</span>
-      <h2>Automated Quality Gates on Every PR</h2>
-      <p class="subtitle">Zero broken code reaches <code>main</code>. Every pull request must pass all four checks:</p>
-      <div class="grid-2">
-        <div>
-          <pre><span class="cmt"># .github/workflows/ci.yml</span>
+    <section class="slide" data-notes="Let's inspect Stage 1: The Quality Gate in .github/workflows/ci.yml. Every PR must pass all four gates including automated LCOV coverage calculation right on the Linux runner, failing the build if line coverage drops below 80%.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 3. Continuous Integration (ci.yml)</span>
+      </div>
+      <h2 class="animate-in delay-2">Automated Quality Gates on Every PR</h2>
+      <p class="subtitle animate-in delay-3">Zero broken code reaches <code>main</code>. Every pull request must pass all four checks:</p>
+      <div class="grid-2 animate-in delay-4">
+        <div class="code-window">
+          <div class="code-header">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+            <span class="code-title">.github/workflows/ci.yml</span>
+          </div>
+          <pre><span class="cmt"># Automated Quality Gates in CI</span>
 - <span class="kw">name:</span> <span class="str">"Verify Code Formatting"</span>
   <span class="kw">run:</span> dart format --output=none --set-exit-if-changed lib test
 
@@ -400,59 +633,104 @@
         <div class="card">
           <h3>🔍 Why Each Gate Matters</h3>
           <ul>
-            <li><strong><code>--set-exit-if-changed</code>:</strong> Fails CI immediately if a developer forgot to format their Dart code.</li>
-            <li><strong><code>--fatal-infos</code>:</strong> Treats even minor lint hints and unused imports as build-breaking errors.</li>
-            <li><strong>Widget + Unit Tests:</strong> Verifies both business logic (<code>AppConfig</code>) and UI rendering (no layout overflows!).</li>
-            <li><strong>LCOV Threshold Gate:</strong> Parses <code>coverage/lcov.info</code> and writes a Markdown summary directly to the GitHub PR page.</li>
+            <li><strong><code>--set-exit-if-changed</code>:</strong> Rejects unformatted code immediately before code review.</li>
+            <li><strong><code>--fatal-infos</code>:</strong> Enforces clean code standards with zero warnings or unused imports.</li>
+            <li><strong>Widget & Unit Tests:</strong> Verifies business logic, repository contracts, and layout integrity.</li>
+            <li><strong>Automated LCOV Gate:</strong> Generates a Markdown test summary directly on the GitHub PR page.</li>
           </ul>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 5: MULTI-ENVIRONMENT DART-DEFINE -->
-    <section class="slide" data-notes="How do we build Dev, Staging, and Production apps without editing code before a release? We use Flutter's compile-time --dart-define constants inside lib/config/app_config.dart.">
-      <span class="pill">4. Multi-Environment Management</span>
-      <h2>Compile-Time Config with <code>--dart-define</code></h2>
-      <p class="subtitle">One codebase, multiple environments — zero hardcoded secrets or manual file swapping.</p>
-      <div class="grid-2">
-        <pre><span class="cmt">// lib/config/app_config.dart</span>
-<span class="kw">factory</span> AppConfig.fromEnvironment() {
+    <!-- SLIDE 5: CLEAN ARCHITECTURE & MVVM -->
+    <section class="slide" data-notes="To make the mobile app maintainable and production-ready, we applied Clean Architecture and SOLID principles. The app is divided into three distinct layers: Domain with pure business models, Data with repositories and live GitHub APIs, and Presentation with MVVM state management.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 4. Clean Architecture & SOLID</span>
+      </div>
+      <h2 class="animate-in delay-2">Production-Grade Flutter Architecture</h2>
+      <p class="subtitle animate-in delay-3">Separation of concerns ensures testability, scalability, and zero framework coupling in business logic.</p>
+      <div class="grid-3 animate-in delay-4">
+        <div class="card" style="border-top: 4px solid var(--purple);">
+          <h3>🏛️ Domain Layer</h3>
+          <p>Pure Dart models (<code>PipelineRun</code>, <code>ReleaseArtifact</code>, <code>KpiMetric</code>) and abstract repository contracts adhering to the <strong>Dependency Inversion Principle</strong>.</p>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--accent);">
+          <h3>📡 Data Layer</h3>
+          <p><code>CiCdDataSource</code> communicates directly with the <strong>GitHub Actions & Releases REST API</strong> with automatic offline fallback when internet is unavailable.</p>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--green);">
+          <h3>🎨 Presentation (MVVM)</h3>
+          <p><code>DashboardViewModel</code> handles reactive state, tab selection, and theme modes. Reusable views and widgets consume state without holding business logic.</p>
+        </div>
+      </div>
+      <div class="card animate-in delay-5" style="margin-top: 18px; border-left: 4px solid var(--purple);">
+        <h3>🌓 Dynamic System Theme Support</h3>
+        <p>Built with Material 3 to automatically adapt to the user's <strong>Device Default Theme (Light/Dark)</strong>, while providing a manual 3-state cycling control (Auto ➔ Light ➔ Dark) in the AppBar.</p>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: MULTI-ENVIRONMENT DART-DEFINE -->
+    <section class="slide" data-notes="How do we build Dev, Staging, and Production apps without modifying source code before every release? We use Flutter's compile-time --dart-define flags. The CI pipeline injects environment endpoints, version tags, and commit SHAs directly into the compiled binary.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 5. Multi-Environment Management</span>
+      </div>
+      <h2 class="animate-in delay-2">Compile-Time Config with <code>--dart-define</code></h2>
+      <p class="subtitle animate-in delay-3">One codebase, multiple environments — zero hardcoded URLs or dangerous manual file swaps.</p>
+      <div class="grid-2 animate-in delay-4">
+        <div class="code-window">
+          <div class="code-header">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+            <span class="code-title">lib/config/app_config.dart</span>
+          </div>
+          <pre><span class="kw">factory</span> AppConfig.fromEnvironment() {
   <span class="kw">const</span> rawEnv = String.fromEnvironment(
     <span class="str">'APP_ENV'</span>, defaultValue: <span class="str">'dev'</span>,
   );
   <span class="kw">const</span> appVersion = String.fromEnvironment(
-    <span class="str">'APP_VERSION'</span>, defaultValue: <span class="str">'1.0.0'</span>,
+    <span class="str">'APP_VERSION'</span>, defaultValue: <span class="str">'1.2.0'</span>,
   );
   <span class="kw">const</span> buildNum = String.fromEnvironment(
-    <span class="str">'BUILD_NUMBER'</span>, defaultValue: <span class="str">'1'</span>,
+    <span class="str">'BUILD_NUMBER'</span>, defaultValue: <span class="str">'42'</span>,
   );
   <span class="kw">const</span> gitCommit = String.fromEnvironment(
-    <span class="str">'GIT_COMMIT'</span>, defaultValue: <span class="str">'local-dev'</span>,
+    <span class="str">'GIT_COMMIT'</span>, defaultValue: <span class="str">'9fdb61d'</span>,
   );
   ...
 }</pre>
+        </div>
         <div class="card">
-          <h3>🎨 Visual Environment Awareness in Relay Mobile</h3>
-          <p>When CI runs <code>flutter build</code>, it injects metadata straight into the binary:</p>
+          <h3>🎨 Visual Environment Awareness</h3>
+          <p>The app dynamically adapts its primary color, badge, and API endpoint at runtime:</p>
           <div class="badge-row">
-            <span class="env-tag env-dev">DEV • Blue Theme • api.dev.relay.internal</span>
-            <span class="env-tag env-stg">STAGING • Amber Theme • api.staging.relay.internal</span>
-            <span class="env-tag env-prd">PROD • Green Theme • api.relay.io</span>
+            <span class="env-tag env-dev">DEV • Cyber Blue • api.dev.relay.internal</span>
+            <span class="env-tag env-stg">STAGING • Amber • api.staging.relay.internal</span>
+            <span class="env-tag env-prd">PROD • Emerald • api.relay.io</span>
           </div>
-          <p style="margin-top: 16px;">
-             QA testers can immediately see on screen which environment, build number (<code>#42</code>), and exact Git commit SHA (<code>a1b2c3d</code>) they are testing!
+          <p style="margin-top: 14px;">
+            Testers can immediately verify the environment badge, version string (<code>v1.2.0+42</code>), and exact Git commit SHA on their devices!
           </p>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 6: CODE SIGNING & SECRETS -->
-    <section class="slide" data-notes="Code signing is often the scariest part of mobile CI/CD. Here is how we solved it cleanly in android/app/build.gradle.kts and .github/workflows/cd_release.yml.">
-      <span class="pill">5. Security & Code Signing</span>
-      <h2>Zero-Touch Release Signing in CI</h2>
-      <p class="subtitle">Never commit <code>.jks</code> keystores or <code>key.properties</code> to Git. Decode them in CI memory.</p>
-      <div class="grid-2">
-        <pre><span class="cmt"># 1. Encode keystore locally once:</span>
+    <!-- SLIDE 7: SECURITY & CODE SIGNING -->
+    <section class="slide" data-notes="Code signing is often the biggest hurdle in mobile automation. Here is our secure solution: never commit keystores or passwords to git. We encode the release keystore as a Base64 string in GitHub Secrets and decode it in runner memory only during the build step.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 6. Security & Code Signing</span>
+      </div>
+      <h2 class="animate-in delay-2">Zero-Touch Release Signing in CI</h2>
+      <p class="subtitle animate-in delay-3">Never commit <code>.jks</code> keystores or <code>key.properties</code> to Git. Decode them in CI runner memory.</p>
+      <div class="grid-2 animate-in delay-4">
+        <div class="code-window">
+          <div class="code-header">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+            <span class="code-title">GitHub Actions Runner Step</span>
+          </div>
+          <pre><span class="cmt"># 1. Encode keystore locally once:</span>
 base64 -i upload-keystore.jks | pbcopy
 
 <span class="cmt"># 2. In GitHub Actions (cd_release.yml):</span>
@@ -466,83 +744,106 @@ base64 -i upload-keystore.jks | pbcopy
     keyAlias=$KEY_ALIAS
     storeFile=upload-keystore.jks
     EOF</pre>
+        </div>
         <div class="card">
           <h3>🔐 Safe Fallback in <code>build.gradle.kts</code></h3>
-          <p>Our Gradle config checks if <code>android/key.properties</code> exists:</p>
-          <ul style="margin-top: 10px;">
-            <li><strong>In Production CI:</strong> Uses the decoded <code>upload-keystore.jks</code> to produce Play-Store-ready signed AAB/APKs.</li>
-            <li><strong>In Local / Fork Builds:</strong> Gracefully falls back so builds still succeed without exposing production keys!</li>
-            <li><strong>For iOS (macOS runners):</strong> Uses App Store Connect API Key (<code>.p8</code>) + <em>Fastlane Match</em> to sync provisioning profiles via an encrypted private Git repo.</li>
+          <p>Our Gradle build config inspects whether <code>key.properties</code> exists:</p>
+          <ul style="margin-top: 8px;">
+            <li><strong>In Production CI:</strong> Uses decoded <code>upload-keystore.jks</code> to produce Play-Store-ready signed AAB/APKs.</li>
+            <li><strong>In Local Dev Builds:</strong> Automatically falls back to debug signing so developers without prod keys can build without errors!</li>
+            <li><strong>For iOS:</strong> Compiles release archives on macOS runners with <code>--no-codesign</code> in CI and Fastlane Match for distribution.</li>
           </ul>
         </div>
       </div>
     </section>
 
-    <!-- SLIDE 7: CONTINUOUS DELIVERY & ARTIFACTS -->
-    <section class="slide" data-notes="Once the artifacts are signed and built, Stage 4 distributes them automatically. When we push a git tag like v1.2.0 or trigger workflow_dispatch, GitHub Actions creates a release with downloadable APKs, AABs, and Web bundles.">
-      <span class="pill">6. Continuous Delivery (cd_release.yml)</span>
-      <h2>Automated Release Packaging & Distribution</h2>
-      <p class="subtitle">Trigger releases via Git tags (<code>git tag v1.2.0 && git push --tags</code>) or manual 1-click dispatch.</p>
-      <div class="grid-3">
-        <div class="card">
-          <h3>📦 1. GitHub Releases (Free)</h3>
-          <p>Automatically generates changelog notes from commits and attaches <code>app-release.apk</code> & <code>app-release.aab</code> for instant download.</p>
-        </div>
-        <div class="card">
-          <h3>🧪 2. Firebase App Distribution</h3>
-          <p>Pushes <code>staging</code> builds directly to QA testers' phones with email/Slack notifications on every merge.</p>
-        </div>
-        <div class="card">
-          <h3>🏪 3. Play Store & TestFlight</h3>
-          <p>Uploads signed <code>.aab</code> to Google Play Internal Track and <code>.ipa</code> to Apple TestFlight for production rollout.</p>
-        </div>
+    <!-- SLIDE 8: REAL-TIME GITHUB ACTIONS DELIVERY -->
+    <section class="slide" data-notes="Here is continuous delivery in action. Pushing a tag like v1.0.0 automatically triggers cd_release.yml. GitHub Actions compiles the signed APK and AAB, copies them to a release folder, and publishes them to GitHub Releases. The mobile app even queries this live API in real time!">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 7. Live Delivery & GitHub API</span>
       </div>
-      <pre style="margin-top: 20px;"><span class="cmt"># Triggering a production release takes 1 command:</span>
-git tag v1.2.0 &amp;&amp; git push origin v1.2.0</pre>
-    </section>
-
-    <!-- SLIDE 8: LIVE DEMO RUNBOOK -->
-    <section class="slide" data-notes="Now it's time for our live demonstration! I will switch to the terminal and app window to show 3 things live: 1) Our multi-environment Relay Mobile app, 2) What happens when a developer breaks a test or lint rule, and 3) A full end-to-end passing CI/CD pipeline execution.">
-      <span class="pill">7. Live Demonstration</span>
-      <h2>What We Will See in the Live Demo</h2>
-      <p class="subtitle">Three real-world scenarios running live on the <code>relay_mobile</code> codebase:</p>
-      <div class="grid-3">
+      <h2 class="animate-in delay-2">Automated Cloud Distribution in Action</h2>
+      <p class="subtitle animate-in delay-3">Real-time pipeline execution on <code>Zabith-Fulail/relay-mobile-cicd</code> publishes downloadable releases in ~5 minutes.</p>
+      <div class="grid-3 animate-in delay-4">
         <div class="card" style="border-top: 4px solid var(--accent);">
-          <h3>Demo 1: Multi-Env App</h3>
-          <p>Launch Relay Mobile with injected <code>--dart-define</code> flags and switch live between <strong>DEV</strong>, <strong>STAGING</strong>, and <strong>PROD</strong> configurations.</p>
+          <h3>📦 1. GitHub Releases</h3>
+          <p>Automatically publishes release notes and attaches <code>app-release.apk</code> & <code>app-release.aab</code> for instant cloud download.</p>
         </div>
-        <div class="card" style="border-top: 4px solid var(--amber);">
-          <h3>Demo 2: CI Pipeline Run</h3>
-          <p>Execute <code>./scripts/run_ci_demo.sh</code> to watch Formatting, Static Analysis, Unit/Widget Tests, 80%+ Coverage Gate, and Release Build pass live.</p>
+        <div class="card" style="border-top: 4px solid var(--purple);">
+          <h3>🌐 2. Live REST Telemetry</h3>
+          <p>The mobile app's <code>CiCdDataSource</code> queries <code>api.github.com</code> in real time to display live workflow runs and download counts.</p>
         </div>
         <div class="card" style="border-top: 4px solid var(--green);">
-          <h3>Demo 3: GitHub Workflows</h3>
-          <p>Inspect <code>.github/workflows/ci.yml</code> and <code>cd_release.yml</code> + run <code>./scripts/generate_keystore.sh</code> for release signing.</p>
+          <h3>🏪 3. Store Distribution</h3>
+          <p>Ready-to-enable action steps for Google Play Internal Track and Apple TestFlight deployment on every production tag.</p>
         </div>
       </div>
-      <pre style="margin-top: 20px;"><span class="cmt"># Live Demo Command:</span>
-./scripts/run_ci_demo.sh --env=prod</pre>
+      <div class="code-window animate-in delay-5" style="margin-top: 18px;">
+        <div class="code-header">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+          <span class="code-title">Terminal One-Liner</span>
+        </div>
+        <pre><span class="cmt"># Triggering a full production release takes 1 command:</span>
+git tag v1.0.0 &amp;&amp; git push origin v1.0.0</pre>
+      </div>
     </section>
 
-    <!-- SLIDE 9: TAKEAWAYS & Q&A -->
-    <section class="slide" data-notes="To wrap up: automating Flutter CI/CD costs $0 to start with GitHub Actions, catches bugs before code review, and turns stressful Friday deployments into a routine 1-click event. Thank you! I'd love to take any questions.">
-      <span class="pill">8. Conclusion & Q&A</span>
-      <h2>Key Takeaways</h2>
-      <p class="subtitle">Start small, automate the quality gates first, and scale into full store delivery.</p>
-      <div class="grid-2">
-        <div class="card">
-          <h3>🏆 Summary Checklist</h3>
+    <!-- SLIDE 9: LIVE DEMONSTRATION RUNBOOK -->
+    <section class="slide" data-notes="Now it's time for our live demonstration! We will show 3 things: 1) The live GitHub Actions web console and Releases page, 2) The Relay Mobile Command Center running on our device with real-time GitHub telemetry, and 3) Running our local pipeline simulator in terminal to see the 4 stages pass live.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 8. Live Demonstration</span>
+      </div>
+      <h2 class="animate-in delay-2">Step-by-Step Live Demonstration</h2>
+      <p class="subtitle animate-in delay-3">Experience the full automated pipeline across Cloud, Terminal, and Mobile Device:</p>
+      <div class="grid-3 animate-in delay-4">
+        <div class="card" style="border-top: 4px solid var(--accent);">
+          <h3>Step 1: Cloud GitHub Actions</h3>
+          <p>Show <code>relay-mobile-cicd/actions</code> with the 4-stage workflow graph and the <strong>Releases</strong> page with downloadable APK & AAB.</p>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--green);">
+          <h3>Step 2: Mobile App Showcase</h3>
+          <p>Open Relay Mobile on device: switch <strong>DEV/STAGING/PROD</strong>, toggle Light/Dark mode, test live GitHub API refresh, and inspect artifacts.</p>
+        </div>
+        <div class="card" style="border-top: 4px solid var(--amber);">
+          <h3>Step 3: Terminal Quality Gate</h3>
+          <p>Execute <code>./scripts/run_ci_demo.sh --env=prod --with-ios</code> to show Formatting, Analysis, Tests (98% cov), and Release Build pass live!</p>
+        </div>
+      </div>
+      <div class="code-window animate-in delay-5" style="margin-top: 18px;">
+        <div class="code-header">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+          <span class="code-title">Terminal Runbook</span>
+        </div>
+        <pre><span class="cmt"># Live Demo Terminal Command:</span>
+./scripts/run_ci_demo.sh --env=prod --with-ios</pre>
+      </div>
+    </section>
+
+    <!-- SLIDE 10: CONCLUSION & TAKEAWAYS -->
+    <section class="slide" data-notes="To wrap up: automating Flutter CI/CD costs $0 to start with GitHub Actions, enforces code quality before review, and turns stressful deployments into a routine, one-click event. Thank you! I'm now happy to take questions.">
+      <div class="animate-in delay-1">
+        <span class="pill"><span class="pill-pulse"></span> 9. Conclusion & Q&A</span>
+      </div>
+      <h2 class="animate-in delay-2">Key Takeaways & Production Checklist</h2>
+      <p class="subtitle animate-in delay-3">Start small, automate quality gates first, and scale into full multi-platform store delivery.</p>
+      <div class="grid-2 animate-in delay-4">
+        <div class="card" style="border-left: 4px solid var(--accent);">
+          <h3>🏆 Production Checklist</h3>
           <ul>
-            <li><strong>Gate Every PR:</strong> <code>dart format</code> + <code>flutter analyze</code> + <code>flutter test --coverage</code>.</li>
-            <li><strong>Use <code>--dart-define</code>:</strong> Inject environment URLs, version numbers, and commit SHAs at build time.</li>
-            <li><strong>Keep Secrets Out of Git:</strong> Base64-encode keystores into GitHub Secrets; decode in runner RAM.</li>
-            <li><strong>Automate Releases:</strong> Use Git tags (<code>v*.*.*</code>) to publish signed APKs/AABs automatically.</li>
+            <li><strong>Automate PR Gates:</strong> <code>dart format</code> + <code>flutter analyze</code> + <code>flutter test --coverage</code>.</li>
+            <li><strong>Use <code>--dart-define</code>:</strong> Inject environment URLs, versions, and commit SHAs at build time.</li>
+            <li><strong>Keep Keys Out of Git:</strong> Base64-encode keystores into GitHub Secrets; decode only in RAM.</li>
+            <li><strong>Clean Architecture:</strong> Separate Domain, Data, and MVVM presentation for maintainability.</li>
           </ul>
         </div>
-        <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; border-left: 4px solid var(--green);">
           <h2 style="color: var(--accent); margin-bottom: 8px;">Thank You!</h2>
-          <p style="font-size: 18px; margin-bottom: 16px;">Questions & Discussion</p>
-          <span class="env-tag env-prd">Relay Mobile • CI/CD Ready</span>
+          <p style="font-size: 16px; margin-bottom: 16px;">Questions & Technical Discussion</p>
+          <span class="env-tag env-prd">Relay Mobile • Production CI/CD Ready</span>
         </div>
       </div>
     </section>
@@ -555,11 +856,12 @@ git tag v1.2.0 &amp;&amp; git push origin v1.2.0</pre>
       <strong>Automating Flutter Delivery with Production CI/CD</strong> • Relay Mobile
     </div>
     <div class="controls">
-      <span id="slideCounter">Slide 1 / 9</span>
+      <span id="slideCounter">Slide 1 / 10</span>
       <button onclick="prevSlide()">← Prev</button>
       <button onclick="nextSlide()">Next →</button>
       <button onclick="toggleNotes()">📝 Notes (S)</button>
       <button onclick="toggleFullScreen()">⛶ Fullscreen (F)</button>
+      <button class="theme-toggle-btn" onclick="toggleTheme()" id="themeBtn">🌓 Theme</button>
     </div>
   </footer>
 
@@ -568,10 +870,23 @@ git tag v1.2.0 &amp;&amp; git push origin v1.2.0</pre>
     const progressFill = document.getElementById('progressFill');
     const slideCounter = document.getElementById('slideCounter');
     const speakerNotes = document.getElementById('speakerNotes');
+    const themeBtn = document.getElementById('themeBtn');
     let current = 0;
 
     function updateSlide() {
-      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      slides.forEach((s, i) => {
+        const isActive = (i === current);
+        s.classList.toggle('active', isActive);
+        if (isActive) {
+          // Trigger CSS animations on child elements by re-adding class
+          const animElements = s.querySelectorAll('.animate-in');
+          animElements.forEach(el => {
+            el.style.animation = 'none';
+            void el.offsetHeight; // trigger reflow
+            el.style.animation = '';
+          });
+        }
+      });
       const pct = ((current + 1) / slides.length) * 100;
       progressFill.style.width = pct + '%';
       slideCounter.textContent = `Slide ${current + 1} / ${slides.length}`;
@@ -605,6 +920,19 @@ git tag v1.2.0 &amp;&amp; git push origin v1.2.0</pre>
       }
     }
 
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('relay_deck_theme', newTheme);
+      themeBtn.textContent = newTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
+    }
+
+    // Default to Light Theme
+    const savedTheme = localStorage.getItem('relay_deck_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️ Light' : '🌙 Dark';
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowRight' || e.key === ' ') {
         e.preventDefault();
@@ -616,6 +944,8 @@ git tag v1.2.0 &amp;&amp; git push origin v1.2.0</pre>
         toggleNotes();
       } else if (e.key.toLowerCase() === 'f') {
         toggleFullScreen();
+      } else if (e.key.toLowerCase() === 't') {
+        toggleTheme();
       }
     });
 
@@ -623,4 +953,3 @@ git tag v1.2.0 &amp;&amp; git push origin v1.2.0</pre>
   </script>
 </body>
 </html>
-
