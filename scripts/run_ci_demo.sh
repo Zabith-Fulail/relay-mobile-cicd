@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Relay Mobile — Live Mobile CI/CD Pipeline Runner (Android & iOS)
+# VaultOps — Live Mobile CI/CD Pipeline Runner (Android & iOS)
 # Usage:
 #   ./scripts/run_ci_demo.sh                                       # Full Mobile CI/CD (prod v1.2.0+42)
 #   ./scripts/run_ci_demo.sh --env=prod --version=2.0.0 --build=101 # Custom Production Release
@@ -67,7 +67,7 @@ step_ok() {
 }
 
 echo -e "${BOLD}${CYAN}"
-echo "  📱 RELAY MOBILE — AUTOMATED ANDROID & iOS CI/CD PIPELINE"
+echo "  📱 VAULTOPS — AUTOMATED ANDROID & iOS CI/CD PIPELINE"
 echo -e "${RESET}"
 echo -e "  • Target Environment : ${YELLOW}${APP_ENV}${RESET}"
 echo -e "  • Mobile Version     : ${YELLOW}v${APP_VERSION}+${BUILD_NUMBER}${RESET}"

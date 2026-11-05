@@ -47,11 +47,11 @@ enum AppEnvironment {
   String get defaultApiUrl {
     switch (this) {
       case AppEnvironment.dev:
-        return 'https://api.dev.relay.internal';
+        return 'https://api.dev.vaultops.internal';
       case AppEnvironment.staging:
-        return 'https://api.staging.relay.internal';
+        return 'https://api.staging.vaultops.internal';
       case AppEnvironment.prod:
-        return 'https://api.relay.io';
+        return 'https://api.vaultops.io';
     }
   }
 

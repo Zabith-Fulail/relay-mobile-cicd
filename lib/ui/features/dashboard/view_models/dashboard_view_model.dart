@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:relay_mobile/config/app_config.dart';
-import 'package:relay_mobile/domain/models/release_models.dart';
-import 'package:relay_mobile/domain/repositories/release_repository.dart';
+import 'package:vault_ops/config/app_config.dart';
+import 'package:vault_ops/domain/models/release_models.dart';
+import 'package:vault_ops/domain/repositories/release_repository.dart';
 
 /// ViewModel managing UI state for the DevOps Command Center.
 /// Adheres to Single Responsibility (Presentation logic & state).

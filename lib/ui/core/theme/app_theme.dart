@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:relay_mobile/config/app_config.dart';
+import 'package:vault_ops/config/app_config.dart';
 
 /// App theme definitions supporting System Theme, Dynamic Environment Seeds,
 /// Light Mode, and Dark Mode.

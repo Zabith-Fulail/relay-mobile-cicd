@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:relay_mobile/ui/features/dashboard/view_models/dashboard_view_model.dart';
+import 'package:vault_ops/ui/features/dashboard/view_models/dashboard_view_model.dart';
 
 class ArtifactsTabView extends StatelessWidget {
   const ArtifactsTabView({

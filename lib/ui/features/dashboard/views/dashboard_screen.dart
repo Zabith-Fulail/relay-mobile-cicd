@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:relay_mobile/ui/features/dashboard/view_models/dashboard_view_model.dart';
-import 'package:relay_mobile/ui/features/dashboard/views/tabs/artifacts_tab_view.dart';
-import 'package:relay_mobile/ui/features/dashboard/views/tabs/flavors_tab_view.dart';
-import 'package:relay_mobile/ui/features/dashboard/views/tabs/overview_tab_view.dart';
-import 'package:relay_mobile/ui/features/dashboard/views/tabs/pipelines_tab_view.dart';
+import 'package:vault_ops/ui/features/dashboard/view_models/dashboard_view_model.dart';
+import 'package:vault_ops/ui/features/dashboard/views/tabs/artifacts_tab_view.dart';
+import 'package:vault_ops/ui/features/dashboard/views/tabs/flavors_tab_view.dart';
+import 'package:vault_ops/ui/features/dashboard/views/tabs/overview_tab_view.dart';
+import 'package:vault_ops/ui/features/dashboard/views/tabs/pipelines_tab_view.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({

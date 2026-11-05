@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:relay_mobile/config/app_config.dart';
-import 'package:relay_mobile/data/repositories/cicd_release_repository.dart';
-import 'package:relay_mobile/data/services/cicd_data_source.dart';
-import 'package:relay_mobile/main.dart';
-import 'package:relay_mobile/ui/features/dashboard/view_models/dashboard_view_model.dart';
+import 'package:vault_ops/config/app_config.dart';
+import 'package:vault_ops/data/repositories/cicd_release_repository.dart';
+import 'package:vault_ops/data/services/cicd_data_source.dart';
+import 'package:vault_ops/main.dart';
+import 'package:vault_ops/ui/features/dashboard/view_models/dashboard_view_model.dart';
 
 void main() {
   group('Clean Architecture Data & Domain Layer Tests', () {
@@ -86,13 +86,13 @@ void main() {
   });
 
   group(
-    'RelayApp Clean Architecture & System Theme Integration Widget Tests',
+    'VaultOpsApp Clean Architecture & System Theme Integration Widget Tests',
     () {
       testWidgets('respects device system theme and switches themes cleanly', (
         WidgetTester tester,
       ) async {
         await tester.pumpWidget(
-          const RelayApp(
+          const VaultOpsApp(
             initialThemeMode: ThemeMode.system,
             autoRefresh: false,
           ),
@@ -127,7 +127,7 @@ void main() {
         );
 
         await tester.pumpWidget(
-          const RelayApp(initialConfig: initialConfig, autoRefresh: false),
+          const VaultOpsApp(initialConfig: initialConfig, autoRefresh: false),
         );
 
         expect(find.text('STAGING / QA'), findsAtLeastNWidgets(1));

@@ -1,5 +1,5 @@
-import 'package:relay_mobile/config/app_config.dart';
-import 'package:relay_mobile/domain/models/release_models.dart';
+import 'package:vault_ops/config/app_config.dart';
+import 'package:vault_ops/domain/models/release_models.dart';
 
 /// Abstract repository contract for querying CI/CD pipelines, stages,
 /// feature flags, and signed release artifacts (Dependency Inversion Principle).

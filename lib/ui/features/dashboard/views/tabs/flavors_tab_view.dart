@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:relay_mobile/ui/features/dashboard/view_models/dashboard_view_model.dart';
-import 'package:relay_mobile/ui/features/dashboard/views/widgets/dashboard_widgets.dart';
+import 'package:vault_ops/ui/features/dashboard/view_models/dashboard_view_model.dart';
+import 'package:vault_ops/ui/features/dashboard/views/widgets/dashboard_widgets.dart';
 
 class FlavorsTabView extends StatelessWidget {
   const FlavorsTabView({

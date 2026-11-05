@@ -1,0 +1,135 @@
+# ==============================================================================
+# GitLab CI/CD Pipeline for Flutter Mobile (Bank2U / CBC Mobile)
+# ==============================================================================
+
+# Use official pre-baked Flutter Docker image with Android SDK & Java 17
+image: ghcr.io/cirruslabs/flutter:stable
+
+stages:
+  - quality_gate
+  - build
+  - deploy
+
+# Cache Flutter Pub packages and Gradle caches across runs for ~60% faster builds
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .pub-cache/
+    - android/.gradle/caches/
+
+before_script:
+  - export PUB_CACHE="${CI_PROJECT_DIR}/.pub-cache"
+  - export PATH="${PATH}:${PUB_CACHE}/bin"
+  - flutter --version
+  - flutter pub get
+
+# ==============================================================================
+# STAGE 1: Automated Quality Gate (Format, Analyze, Test & Coverage)
+# Runs on every Push and Merge Request
+# ==============================================================================
+lint_and_format:
+  stage: quality_gate
+  script:
+    - echo "Checking code formatting..."
+    - dart format --output=none --set-exit-if-changed lib test
+    - echo "Running static analysis (zero warnings)..."
+    - flutter analyze --fatal-infos
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"'
+
+unit_and_widget_tests:
+  stage: quality_gate
+  script:
+    - echo "Running automated tests with coverage..."
+    - flutter test --coverage --reporter expanded
+    - echo "Calculating Line Coverage..."
+    - TOTAL=$(grep -E '^LF:' coverage/lcov.info | cut -d: -f2 | awk '{s+=$1} END {print s}')
+    - HIT=$(grep -E '^LH:' coverage/lcov.info | cut -d: -f2 | awk '{s+=$1} END {print s}')
+    - COV=$(awk "BEGIN {printf \"%.1f\", ($HIT / $TOTAL) * 100}")
+    - echo "Line Coverage: ${COV}%"
+    # Fails pipeline if coverage < 80.0%
+    - awk "BEGIN {if ($COV < 80.0) exit 1}"
+  coverage: '/Line Coverage: \d+\.\d+%/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/lcov.info
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_BRANCH == "develop"'
+
+# ==============================================================================
+# STAGE 2: Build Android Release APK & AAB
+# Injects compile-time --dart-define and decodes release keystore
+# ==============================================================================
+build_android:
+  stage: build
+  script:
+    - export APP_ENV=${APP_ENV:-"prod"}
+    - export APP_VERSION=${CI_COMMIT_TAG#v}
+    - export APP_VERSION=${APP_VERSION:-"1.0.0"}
+    - export SHORT_SHA=$(echo $CI_COMMIT_SHA | cut -c1-7)
+    
+    # 1. Decode Android Keystore from GitLab CI/CD Variables (if provided)
+    - |
+      if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+        echo "Decoding production Keystore..."
+        echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+        cat <<EOF > android/key.properties
+        storePassword=$ANDROID_STORE_PASSWORD
+        keyPassword=$ANDROID_KEY_PASSWORD
+        keyAlias=$ANDROID_KEY_ALIAS
+        storeFile=upload-keystore.jks
+        EOF
+      fi
+
+    # 2. Build Signed Release APK & Google Play AAB
+    - echo "Building APK and AppBundle for $APP_ENV (v$APP_VERSION)..."
+    - flutter build apk --release 
+        --build-name="$APP_VERSION" 
+        --build-number="$CI_PIPELINE_IID" 
+        --dart-define=APP_ENV="$APP_ENV" 
+        --dart-define=APP_VERSION="$APP_VERSION" 
+        --dart-define=BUILD_NUMBER="$CI_PIPELINE_IID" 
+        --dart-define=GIT_COMMIT="$SHORT_SHA"
+
+    - flutter build appbundle --release 
+        --build-name="$APP_VERSION" 
+        --build-number="$CI_PIPELINE_IID" 
+        --dart-define=APP_ENV="$APP_ENV" 
+        --dart-define=APP_VERSION="$APP_VERSION" 
+        --dart-define=BUILD_NUMBER="$CI_PIPELINE_IID" 
+        --dart-define=GIT_COMMIT="$SHORT_SHA"
+
+    # 3. Collect outputs for instant download
+    - mkdir -p dist/
+    - cp build/app/outputs/flutter-apk/app-release.apk dist/cbc-mobile-${APP_ENV}-v${APP_VERSION}.apk
+    - cp build/app/outputs/bundle/release/app-release.aab dist/cbc-mobile-${APP_ENV}-v${APP_VERSION}.aab
+  artifacts:
+    name: "cbc-mobile-binaries-$CI_COMMIT_REF_NAME"
+    paths:
+      - dist/*.apk
+      - dist/*.aab
+    expire_in: 30 days
+  rules:
+    # Trigger on tags like v1.0.0 or manual trigger
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+
+# ==============================================================================
+# STAGE 3: Publish to GitLab Package Registry / Releases
+# ==============================================================================
+create_gitlab_release:
+  stage: deploy
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  before_script: [] # Skip Flutter setup
+  script:
+    - echo "Publishing release for tag $CI_COMMIT_TAG"
+  release:
+    name: 'Release $CI_COMMIT_TAG'
+    description: 'Automated Flutter release for CBC Mobile ($CI_COMMIT_TAG).'
+    tag_name: '$CI_COMMIT_TAG'
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+/'

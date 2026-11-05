@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:relay_mobile/config/app_config.dart';
-import 'package:relay_mobile/domain/models/release_models.dart';
+import 'package:vault_ops/config/app_config.dart';
+import 'package:vault_ops/domain/models/release_models.dart';
 
 /// Data source that retrieves live CI/CD telemetry from GitHub Actions & Releases API,
 /// with robust offline fallbacks.
@@ -15,7 +15,7 @@ class CiCdDataSource {
 
   Map<String, String> get _headers => const {
     'Accept': 'application/vnd.github.v3+json',
-    'User-Agent': 'RelayMobile-CI-CD-CommandCenter',
+    'User-Agent': 'VaultOps-Mobile-CommandCenter',
   };
 
   /// Returns the standard pipeline quality gate stages.
