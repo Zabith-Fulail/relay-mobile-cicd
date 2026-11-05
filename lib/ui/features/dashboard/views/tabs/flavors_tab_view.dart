@@ -103,25 +103,28 @@ class FlavorsTabView extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     for (final flag in viewModel.featureFlags)
-                      SwitchListTile(
-                        contentPadding: EdgeInsets.zero,
-                        dense: true,
-                        activeThumbColor: primaryColor,
-                        title: Text(
-                          flag.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 13.5,
+                      Material(
+                        color: Colors.transparent,
+                        child: SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          dense: true,
+                          activeThumbColor: primaryColor,
+                          title: Text(
+                            flag.title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13.5,
+                            ),
                           ),
+                          subtitle: Text(
+                            flag.subtitle,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          value: flag.isEnabled,
+                          onChanged: (next) {
+                            viewModel.toggleFeatureFlag(flag.id, next);
+                          },
                         ),
-                        subtitle: Text(
-                          flag.subtitle,
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                        value: flag.isEnabled,
-                        onChanged: (next) {
-                          viewModel.toggleFeatureFlag(flag.id, next);
-                        },
                       ),
                   ],
                 ),
