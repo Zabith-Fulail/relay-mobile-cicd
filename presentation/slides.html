@@ -642,7 +642,53 @@
       </div>
     </section>
 
-    <!-- SLIDE 5: CLEAN ARCHITECTURE & MVVM -->
+    <!-- SLIDE 5: REAL-WORLD CASE STUDY (THE INVISIBLE BUG) -->
+    <section class="slide" data-notes="Now let me share a real-world case study from our project that demonstrates the true value of CI/CD. During our recent release, we ran into an unexpected test failure on GitHub Actions. Interestingly, nobody on our team had written a test specifically for tap ripples or Material wrappers. But because our CI/CD pipeline enforces automated widget testing on a modern Flutter runner, the Flutter framework's internal assertions caught a subtle UI defect: a SwitchListTile was wrapped inside a decorated container, which would have silently hidden tap ripples from our users. The CI quality gate immediately blocked the release, we wrapped it in a transparent Material widget, and production was protected!">
+      <div class="animate-in delay-1">
+        <span class="pill" style="border-color: rgba(225, 29, 72, 0.35); background: var(--red-soft); color: var(--red);"><span class="pill-pulse" style="background: var(--red);"></span> Case Study • Real-World Incident</span>
+      </div>
+      <h2 class="animate-in delay-2">How CI/CD Automatically Caught a Silent Framework Bug</h2>
+      <p class="subtitle animate-in delay-3">
+        We didn't write a specific test for this — but our automated CI quality gate caught a subtle rendering defect before it reached users.
+      </p>
+      <div class="grid-2 animate-in delay-4">
+        <div class="card" style="border-left: 4px solid var(--red);">
+          <h3 style="color: var(--red);">🚨 The Incident: Silent Ink Splash Occlusion</h3>
+          <p>During automated testing on the GitHub Actions runner, the test crashed with:</p>
+          <div class="code-window" style="margin-top: 10px; margin-bottom: 10px;">
+            <div class="code-header">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+              <span class="code-title">Flutter Framework Assertion</span>
+            </div>
+            <pre style="font-size: 11.5px; line-height: 1.45; padding: 12px;"><span class="cmt"># Caught by Flutter 3.27+ framework:</span>
+<span class="str">ListTile background color or ink splashes may be invisible.
+The ListTile is wrapped in a DecoratedBox that has a
+background color, hiding tap ripple effects.</span></pre>
+          </div>
+          <p style="font-size: 13.5px;">
+            <strong>The Hidden Trap:</strong> <code>SwitchListTile</code> in our Flavors tab was placed inside a styled <code>Container</code> with an opaque background color, which silently painted over user tap animations.
+          </p>
+        </div>
+        <div class="card" style="border-left: 4px solid var(--green);">
+          <h3 style="color: var(--green);">🛡️ Why CI/CD Made the Difference</h3>
+          <ul>
+            <li><strong>Automated Framework Audits:</strong> In release builds, Dart <code>assert()</code> calls are stripped. But in <code>flutter test</code> on CI, assertions are strictly enforced!</li>
+            <li><strong>Cross-Tab Detection via IndexedStack:</strong> Even when testing tab 0, <code>IndexedStack</code> built the widget tree for all tabs, triggering the check.</li>
+            <li><strong>Zero Broken Code Merged:</strong> GitHub Actions saw exit code 1, failed the pipeline, and blocked the release before any user experienced a broken tap ripple.</li>
+          </ul>
+          <div style="margin-top: 12px; padding: 10px 14px; background: var(--green-soft); border-radius: 10px; border: 1px solid rgba(5, 150, 105, 0.25);">
+            <strong style="color: var(--green); font-size: 13.5px;">✅ The Fix:</strong>
+            <p style="font-size: 13px; margin-top: 2px;">
+              Wrapped <code>SwitchListTile</code> in <code>Material(color: Colors.transparent)</code> to satisfy the framework and restore clean, unoccluded ripple animations.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6: CLEAN ARCHITECTURE & MVVM -->
     <section class="slide" data-notes="To make the mobile app maintainable and production-ready, we applied Clean Architecture and SOLID principles. The app is divided into three distinct layers: Domain with pure business models, Data with repositories and live GitHub APIs, and Presentation with MVVM state management.">
       <div class="animate-in delay-1">
         <span class="pill"><span class="pill-pulse"></span> 4. Clean Architecture & SOLID</span>
@@ -669,7 +715,7 @@
       </div>
     </section>
 
-    <!-- SLIDE 6: MULTI-ENVIRONMENT DART-DEFINE -->
+    <!-- SLIDE 7: MULTI-ENVIRONMENT DART-DEFINE -->
     <section class="slide" data-notes="How do we build Dev, Staging, and Production apps without modifying source code before every release? We use Flutter's compile-time --dart-define flags. The CI pipeline injects environment endpoints, version tags, and commit SHAs directly into the compiled binary.">
       <div class="animate-in delay-1">
         <span class="pill"><span class="pill-pulse"></span> 5. Multi-Environment Management</span>
@@ -704,9 +750,9 @@
           <h3>🎨 Visual Environment Awareness</h3>
           <p>The app dynamically adapts its primary color, badge, and API endpoint at runtime:</p>
           <div class="badge-row">
-            <span class="env-tag env-dev">DEV • Cyber Blue • api.dev.relay.internal</span>
-            <span class="env-tag env-stg">STAGING • Amber • api.staging.relay.internal</span>
-            <span class="env-tag env-prd">PROD • Emerald • api.relay.io</span>
+            <span class="env-tag env-dev">DEV • Cyber Blue • api.dev.vaultops.internal</span>
+            <span class="env-tag env-stg">STAGING • Amber • api.staging.vaultops.internal</span>
+            <span class="env-tag env-prd">PROD • Emerald • api.vaultops.io</span>
           </div>
           <p style="margin-top: 14px;">
             Testers can immediately verify the environment badge, version string (<code>v1.2.0+42</code>), and exact Git commit SHA on their devices!
@@ -715,7 +761,7 @@
       </div>
     </section>
 
-    <!-- SLIDE 7: SECURITY & CODE SIGNING -->
+    <!-- SLIDE 8: SECURITY & CODE SIGNING -->
     <section class="slide" data-notes="Code signing is often the biggest hurdle in mobile automation. Here is our secure solution: never commit keystores or passwords to git. We encode the release keystore as a Base64 string in GitHub Secrets and decode it in runner memory only during the build step.">
       <div class="animate-in delay-1">
         <span class="pill"><span class="pill-pulse"></span> 6. Security & Code Signing</span>
@@ -757,7 +803,7 @@ base64 -i upload-keystore.jks | pbcopy
       </div>
     </section>
 
-    <!-- SLIDE 8: REAL-TIME GITHUB ACTIONS DELIVERY -->
+    <!-- SLIDE 9: REAL-TIME GITHUB ACTIONS DELIVERY -->
     <section class="slide" data-notes="Here is continuous delivery in action. Pushing a tag like v1.0.0 automatically triggers cd_release.yml. GitHub Actions compiles the signed APK and AAB, copies them to a release folder, and publishes them to GitHub Releases. The mobile app even queries this live API in real time!">
       <div class="animate-in delay-1">
         <span class="pill"><span class="pill-pulse"></span> 7. Live Delivery & GitHub API</span>
@@ -790,7 +836,7 @@ git tag v1.0.0 &amp;&amp; git push origin v1.0.0</pre>
       </div>
     </section>
 
-    <!-- SLIDE 9: LIVE DEMONSTRATION RUNBOOK -->
+    <!-- SLIDE 10: LIVE DEMONSTRATION RUNBOOK -->
     <section class="slide" data-notes="Now it's time for our live demonstration! We will show 3 things: 1) The live GitHub Actions web console and Releases page, 2) The VaultOps Command Center running on our device with real-time GitHub telemetry, and 3) Running our local pipeline simulator in terminal to see the 4 stages pass live.">
       <div class="animate-in delay-1">
         <span class="pill"><span class="pill-pulse"></span> 8. Live Demonstration</span>
@@ -823,7 +869,7 @@ git tag v1.0.0 &amp;&amp; git push origin v1.0.0</pre>
       </div>
     </section>
 
-    <!-- SLIDE 10: CONCLUSION & TAKEAWAYS -->
+    <!-- SLIDE 11: CONCLUSION & TAKEAWAYS -->
     <section class="slide" data-notes="To wrap up: automating Flutter CI/CD costs $0 to start with GitHub Actions, enforces code quality before review, and turns stressful deployments into a routine, one-click event. Thank you! I'm now happy to take questions.">
       <div class="animate-in delay-1">
         <span class="pill"><span class="pill-pulse"></span> 9. Conclusion & Q&A</span>

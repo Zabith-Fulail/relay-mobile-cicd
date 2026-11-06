@@ -1,6 +1,6 @@
 # Automating Flutter Delivery with Production CI/CD — Master Presentation Playbook
 
-This repository (`relay_mobile`) contains a complete, **100% production-ready** CI/CD setup for Flutter, an interactive 10-slide HTML presentation deck, Clean Architecture implementation, and live GitHub Actions cloud integration.
+This repository (`vault_ops`) contains a complete, **100% production-ready** CI/CD setup for Flutter, an interactive 11-slide aesthetic presentation deck, Clean Architecture implementation, and live GitHub Actions / GitLab CI cloud integrations.
 
 ---
 
@@ -12,8 +12,9 @@ This repository (`relay_mobile`) contains a complete, **100% production-ready** 
 4. **[lib/config/app_config.dart](lib/config/app_config.dart)** — Compile-time environment configuration via `--dart-define` (`APP_ENV`, `APP_VERSION`, `BUILD_NUMBER`, `GIT_COMMIT`, `API_BASE_URL`, `GITHUB_OWNER`, `GITHUB_REPO`).
 5. **[.github/workflows/ci.yml](.github/workflows/ci.yml)** — Pull Request quality gate (`dart format`, `flutter analyze --fatal-infos`, `flutter test --coverage`, >=80% LCOV coverage gate).
 6. **[.github/workflows/cd_release.yml](.github/workflows/cd_release.yml)** — Tag-triggered multi-platform delivery pipeline (`v*.*.*`) building signed Android APK/AAB and iOS archives, published to **GitHub Releases**.
-7. **[scripts/run_ci_demo.sh](scripts/run_ci_demo.sh)** — Terminal CI/CD pipeline simulator for instant offline stage execution.
-8. **[presentation/slides.html](presentation/slides.html)** — Interactive 10-slide deck with built-in **Speaker Script Bar** (`S` key) and **Fullscreen mode** (`F` key).
+7. **[.gitlab-ci.yml](.gitlab-ci.yml)** — Full GitLab CI/CD pipeline for enterprise / banking deployment (Bank2U CBC).
+8. **[scripts/run_ci_demo.sh](scripts/run_ci_demo.sh)** — Terminal CI/CD pipeline simulator for instant offline stage execution.
+9. **[presentation/slides.html](presentation/slides.html)** — Interactive 11-slide deck with built-in **Speaker Script Bar** (`S` key), **Theme Toggle** (`T` key), and **Fullscreen mode** (`F` key).
 
 ---
 
@@ -27,6 +28,7 @@ open presentation/slides.html
 * **Advance / Go Back:** Press **`→` (Right Arrow)** / **`Space`** or **`←` (Left Arrow)**.
 * **Toggle Speaker Script Bar:** Press **`S`** (displays your exact talking notes at the bottom of the screen!).
 * **Fullscreen Presentation Mode:** Press **`F`**.
+* **Toggle Light/Dark Theme:** Press **`T`**.
 
 ---
 
@@ -38,16 +40,32 @@ open presentation/slides.html
 | **01:30 – 03:00** | **Slide 2: The Problem** | Pain Points | *"Why do manual Flutter builds fail? First, environment drift between developer machines. Second, skipped tests during rushed hotfixes. Third, staging URLs accidentally shipped to production. And fourth, keystores trapped on a single developer's laptop."* |
 | **03:00 – 04:30** | **Slide 3: Pipeline Blueprint** | Two Workflows | *"Our pipeline divides automation into two specialized GitHub Actions workflows: `ci.yml` for fast sub-2-minute PR feedback, and `cd_release.yml` triggered by Git tags (`v*.*.*`) to build and sign Android APK/AAB and iOS archives."* |
 | **04:30 – 06:00** | **Slide 4: Quality Gates** | Enforcement | *"Stage 1 enforces four non-negotiable gates: `dart format`, `flutter analyze --fatal-infos`, unit and widget tests, and an automated bash script that parses `coverage/lcov.info` and fails the PR if line coverage drops below 80%."* |
-| **06:00 – 07:30** | **Slide 5: Clean Architecture** | Code Quality | *"To keep the app maintainable, we adopted Clean Architecture: pure Domain models with Dependency Inversion, a Data layer connecting directly to the GitHub REST API, and an MVVM Presentation layer that adapts automatically to the device's Dark/Light system theme."* |
-| **07:30 – 09:00** | **Slide 6: Multi-Env Config** | `--dart-define` | *"Instead of dangerous manual configuration edits, we use compile-time `--dart-define` flags. The CI pipeline injects `APP_ENV`, `APP_VERSION`, `BUILD_NUMBER`, and `GIT_COMMIT` directly into the binary at build time."* |
-| **09:00 – 10:30** | **Slide 7: Zero-Touch Signing** | Security | *"Keystores and passwords never touch Git. We Base64-encode the release keystore into GitHub Secrets, decode it in runner RAM during the build, and use a safe Gradle fallback so local developer builds never break."* |
-| **10:30 – 12:00** | **Slide 8: Cloud Delivery** | GitHub Actions | *"When a release tag like `v1.0.0` is pushed, GitHub Actions compiles the signed binaries and attaches them to GitHub Releases. The mobile app queries this API in real time to show live workflow runs and download counts."* |
-| **12:00 – 17:00** | **Slide 9: Live Demo** | Interactive Demo | *(Switch from browser to mobile app and terminal — see Live Demo Runbook below!)* |
-| **17:00 – 20:00** | **Slide 10: Conclusion** | Q&A | *"To wrap up: automate PR gates first, inject environment configs via `--dart-define`, secure signing keys in CI secrets, and adopt Clean Architecture. Thank you! I'm now open for questions."* |
+| **06:00 – 08:00** | **Slide 5: Case Study** | Real-World Incident | *(The Silent Bug Caught by CI — See Detailed Story Below!)* *"Now let me share a real incident from our project that proves why CI/CD matters. Nobody on our team wrote a test for ink ripple effects. But when our cloud CI runner tested our app, Flutter's internal SDK assertions detected that a switch tile was inside an opaque container, which would have hidden tap ripples from users. The CI gate failed the build, blocked the release, we fixed it with a transparent Material wrapper, and production was saved!"* |
+| **08:00 – 09:30** | **Slide 6: Clean Architecture** | Code Quality | *"To keep the app maintainable, we adopted Clean Architecture: pure Domain models with Dependency Inversion, a Data layer connecting directly to the GitHub REST API, and an MVVM Presentation layer that adapts automatically to the device's Dark/Light system theme."* |
+| **09:30 – 11:00** | **Slide 7: Multi-Env Config** | `--dart-define` | *"Instead of dangerous manual configuration edits, we use compile-time `--dart-define` flags. The CI pipeline injects `APP_ENV`, `APP_VERSION`, `BUILD_NUMBER`, and `GIT_COMMIT` directly into the binary at build time."* |
+| **11:00 – 12:30** | **Slide 8: Zero-Touch Signing** | Security | *"Keystores and passwords never touch Git. We Base64-encode the release keystore into GitHub Secrets, decode it in runner RAM during the build, and use a safe Gradle fallback so local developer builds never break."* |
+| **12:30 – 14:00** | **Slide 9: Cloud Delivery** | GitHub Actions | *"When a release tag like `v1.0.0` is pushed, GitHub Actions compiles the signed binaries and attaches them to GitHub Releases. The mobile app queries this API in real time to show live workflow runs and download counts."* |
+| **14:00 – 18:00** | **Slide 10: Live Demo** | Interactive Demo | *(Switch from browser to mobile app and terminal — see Live Demo Runbook below!)* |
+| **18:00 – 20:00** | **Slide 11: Conclusion** | Q&A | *"To wrap up: automate PR gates first, inject environment configs via `--dart-define`, secure signing keys in CI secrets, and adopt Clean Architecture. Thank you! I'm now open for questions."* |
 
 ---
 
-## 🎬 Step-by-Step Live Demonstration Runbook (Slide 9)
+## 💡 How to Explain the Case Study (Slide 5: The Silent Bug)
+
+When you arrive at **Slide 5**, use this exact explanation to captivate the audience:
+
+1. **Set the Stage**:
+   > *"Many engineers ask: 'Why should I bother setting up CI/CD if I already test my code locally?' Let me share an actual bug our CI/CD caught in this very project."*
+2. **The Mystery**:
+   > *"During our build verification, GitHub Actions suddenly failed with an assertion error: 'ListTile background color or ink splashes may be invisible.' We didn't write any test looking for tap ripples. So how did this happen?"*
+3. **The Engineering Explanation**:
+   > *"In our Flavors tab, we had four feature flag switches wrapped inside a styled Container with a colored background. In Flutter, tap ripples (ink splashes) are painted on the nearest Material canvas. Our container's background color was secretly painting over the ripple, making it completely invisible to users! In a local release build, Flutter strips out assertions, so we never would have seen it. But in CI/CD, the cloud runner executes `flutter test` in strict debug mode. Flutter's own internal framework assertions audited our widget tree, caught the invisible ripple, and crashed the test."*
+4. **The Punchline**:
+   > *"Because our quality gate was active, the pipeline exited with code 1 and refused to deploy. We wrapped the tile in a transparent Material widget, the test passed, and our users received a flawless UI. That is the true value of CI/CD: it catches framework-level defects automatically, without you having to write a test for every single rule!"*
+
+---
+
+## 🎬 Step-by-Step Live Demonstration Runbook (Slide 10)
 
 ### Part 1: Show the Live Cloud GitHub Console (2 mins)
 1. Open in your browser:
